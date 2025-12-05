@@ -1,0 +1,57 @@
+.calendar {
+    color: red;
+}
+
+.header {
+    margin-bottom: 50px;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.header-data {
+    font-size: 36px;
+}
+
+.header-right-side {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.more-btn {
+    margin-right: 16px;
+}
+
+.navigation-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+}
+
+.navigation-buttons button {
+    background-color: black;
+    color: white;
+    width: 42px;      
+    height: 42px;
+    border-radius: 50%;  
+    display: flex;       
+    justify-content: center;
+    align-items: center;
+    padding: 0;         
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.navigation-buttons button:hover {
+    background-color: #5167f4;
+}
+
+.navigation-buttons svg {
+    width: 10px;  
+    height: auto;
+}

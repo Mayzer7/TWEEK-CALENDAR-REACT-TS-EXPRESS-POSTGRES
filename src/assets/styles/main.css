@@ -1,0 +1,79 @@
+@font-face {
+  font-family: "SuisseIntl Bold";
+  src: url(../fonts/SuisseIntl-Bold.otf);
+  font-weight: 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "SuisseIntl Regular";
+  src: url(../fonts/SuisseIntl-Regular.otf);
+  font-weight: 400;
+  font-style: normal;
+}
+
+:root {
+    --black: #000000;
+}
+
+#root {
+    margin: unset;
+    padding: unset;
+    max-width: 100%;
+}
+
+body {
+    font-family: "SuisseIntl Bold", sans-serif;
+    background-color: #fff;
+    color: var(--black);
+    place-items: unset;
+    text-align: unset;   
+    display: block;
+}
+
+html {
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+body,
+html {
+  margin: 0;
+  padding: 0;
+}
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+*,
+::after,
+::before {
+  box-sizing: inherit;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+}
+li {
+  list-style: none;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin: 0;
+}
+
+.container {
+    padding: 24px 24px 48px;
+}
+
+button {
+  border: none;
+  background-color: transparent;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}
