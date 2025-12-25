@@ -1,0 +1,181 @@
+.radix-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 20, 20, 0.45);
+  backdrop-filter: blur(6px);
+  animation: overlayFade 0.25s ease;
+  z-index: 1000;
+}
+
+.radix-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 520px;
+  max-width: calc(100vw - 32px);
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 22px 24px 20px;
+  box-shadow:
+    0 25px 50px rgba(0, 0, 0, 0.18),
+    0 8px 16px rgba(0, 0, 0, 0.08);
+  animation: modalAppear 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+  z-index: 1001;
+  isolation: isolate;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.modal-date {
+  font-size: 13px;
+  font-weight: 500;
+  color: #8b8b8b;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.check-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  padding: 0;
+  color: #000; 
+}
+
+.check-btn:hover {
+  border-color: #000;
+  background: rgba(0,0,0,0.03);
+  transform: scale(1.03);
+}
+
+.check-btn.completed {
+  background-color: #7d7d7d;
+  border-color: #7d7d7d;
+}
+
+.check-icon {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 3;
+  fill: none;
+  opacity: 0;
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  color: white;
+}
+
+.check-btn:hover .check-icon {
+  opacity: 1;
+  color: #000;
+}
+
+.check-btn.completed .check-icon {
+  opacity: 1;
+  color: white;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7a7a7a;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.12s ease;
+}
+
+.icon-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: #1c1c1c;
+  transform: scale(1.05);
+}
+
+.icon-btn.danger:hover {
+  background: rgba(255, 0, 0, 0.08);
+  color: #d32f2f;
+}
+
+.icon-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.modal-textarea {
+  width: 100%;
+  min-height: 160px;
+  border: none;
+  outline: none;
+  resize: none;
+  background: transparent;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: #1c1c1c;
+  margin-bottom: 18px;
+  font-family: "SuisseIntl Bold", sans-serif;
+}
+
+.modal-textarea::placeholder {
+  color: #b5b5b5;
+}
+
+@keyframes overlayFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalAppear {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -46%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.icon-btn.complete {
+  color: #9a9a9a;
+}
+
+.icon-btn.complete:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: #1c1c1c;
+}
+
+.icon-btn.complete.active {
+  color: #5167f4;
+}
+
+.icon-btn.complete svg {
+  width: 20px;
+  height: 20px;
+}
+
+.modal-textarea.completed {
+  text-decoration: line-through;
+  opacity: 0.6;
+}

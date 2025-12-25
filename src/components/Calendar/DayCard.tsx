@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import "/src/assets/styles/dayCard.css";
 
+import TaskModal from "../Modals/TaskModal";
+
 type Task = {
   id: number;
   text: string;
@@ -22,6 +24,7 @@ export default function DayCard({ cardId, date }: DayCardProps) {
   }));
 
   const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
 
   const updateTaskText = (id: number, text: string) => {
     setTasks(prev => prev.map(t => (t.id === id ? { ...t, text } : t)));
@@ -67,6 +70,23 @@ export default function DayCard({ cardId, date }: DayCardProps) {
     nowMoscow.getMonth() === date.getMonth() &&
     nowMoscow.getFullYear() === date.getFullYear();
 
+
+  const saveTaskFromModal = (updated: Task) => {
+    setTasks(prev =>
+      prev.map(t => (t.id === updated.id ? updated : t))
+    );
+    setActiveTask(updated);
+  };
+
+  const deleteTask = (id: number) => {
+    setTasks(prev =>
+      prev.map(t =>
+        t.id === id ? { ...t, text: "", completed: false } : t
+      )
+    );
+    setActiveTask(null);
+  };  
+
   return (
     <div className={`day-card ${isToday ? "today-highlight" : ""}`}>
       <div className="day-card-header">
@@ -83,6 +103,7 @@ export default function DayCard({ cardId, date }: DayCardProps) {
           <div
             key={task.id}
             className={`task-row ${task.text.trim() === "" ? "empty-task" : ""}`}
+            onClick={() => task.text.trim() && setActiveTask(task)}
           >
             <input
               className={`task-input ${task.completed ? "completed-text" : ""}`}
@@ -113,6 +134,17 @@ export default function DayCard({ cardId, date }: DayCardProps) {
           </div>
         ))}
       </div>
+
+      {activeTask && (
+        <TaskModal
+          task={activeTask}
+          date={date}
+          onClose={() => setActiveTask(null)}
+          onSave={saveTaskFromModal}
+          onDelete={deleteTask}
+        />
+      )}
     </div>
   );
 }
+

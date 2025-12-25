@@ -34,9 +34,8 @@ export default function Header({ month, year, onPrev, onNext }: HeaderProps) {
           <button className="more-btn">
             <svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect width="42" height="42" rx="21" fill="#BE9CF3"/>
-              <circle cx="21" cy="15" r="2" fill="black"/>
-              <circle cx="21" cy="21" r="2" fill="black"/>
-              <circle cx="21" cy="27" r="2" fill="black"/>
+              <circle cx="19" cy="19" r="7" stroke="black" stroke-width="2"/>
+              <line x1="24.41" y1="23.8915" x2="29.8915" y2="28.59" stroke="black" stroke-width="2" stroke-linecap="round"/>
             </svg>
           </button>
 

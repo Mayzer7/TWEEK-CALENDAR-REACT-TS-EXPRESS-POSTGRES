@@ -55,6 +55,10 @@
     animation: fadeIn 0.25s ease;
 }
 
+.task-row.clickable {
+  cursor: pointer;
+}
+
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-5px); }
     to { opacity: 1; transform: translateY(0); }
