@@ -1,10 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "/src/assets/styles/main.css";
 
 import Header from "./components/Calendar/Header";
 import DayCard from "./components/Calendar/DayCard";
 
 export default function App() {
+  useEffect(() => {
+    const scrollToToday = () => {
+      const todayCard = document.querySelector(".today-highlight");
+      if (todayCard) {
+        todayCard.scrollIntoView({ behavior: "instant", block: "center" });
+      }
+    };
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(scrollToToday);
+    });
+  }, []);
   const nowMoscow = new Date(
     new Date().toLocaleString("en-US", { timeZone: "Europe/Moscow" })
   );
