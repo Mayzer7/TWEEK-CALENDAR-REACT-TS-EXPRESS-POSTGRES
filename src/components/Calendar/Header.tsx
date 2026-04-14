@@ -3,6 +3,8 @@ import "/src/assets/styles/header.css";
 interface HeaderProps {
   month: number;
   year: number;
+  currentRealMonth: number;
+  currentRealYear: number;
   onPrev: () => void;
   onNext: () => void;
 }
@@ -12,12 +14,14 @@ const MONTHS = [
   "Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"
 ];
 
-export default function Header({ month, year, onPrev, onNext }: HeaderProps) {
+export default function Header({ month, year, currentRealMonth, currentRealYear, onPrev, onNext }: HeaderProps) {
+  const isCurrentMonth = month === currentRealMonth && year === currentRealYear;
+
   return (
     <div className="header">
       <div className="header-content">
         <div className="header-left-side">
-          <h1 className="header-data">
+          <h1 className={`header-data ${isCurrentMonth ? "current-month" : ""}`}>
             {MONTHS[month]} {year}
           </h1>
         </div>

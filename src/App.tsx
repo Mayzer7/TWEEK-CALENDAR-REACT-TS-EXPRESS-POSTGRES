@@ -18,8 +18,10 @@ export default function App() {
     setCurrentYear(newDate.getFullYear());
   };
 
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
   const dates: Date[] = [];
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < daysInMonth; i++) {
     dates.push(new Date(currentYear, currentMonth, i + 1));
   }
 
@@ -28,6 +30,8 @@ export default function App() {
       <Header
         month={currentMonth}
         year={currentYear}
+        currentRealMonth={nowMoscow.getMonth()}
+        currentRealYear={nowMoscow.getFullYear()}
         onPrev={() => changeMonth(-1)}
         onNext={() => changeMonth(1)}
       />

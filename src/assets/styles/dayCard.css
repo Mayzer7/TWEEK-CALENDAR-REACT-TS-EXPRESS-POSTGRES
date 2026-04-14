@@ -3,13 +3,13 @@
 }
 
 .day-cards {
+    margin-top: 50px;
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     gap: 12px;
 }
 
 .day-card {
-    max-width: 300px;
     padding: 6px;
 }
 

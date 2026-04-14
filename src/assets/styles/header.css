@@ -3,7 +3,13 @@
 }
 
 .header {
-    margin-bottom: 50px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: white;
+    z-index: 1000;
+    padding: 14px 24px; 
 }
 
 .header-content {
@@ -14,6 +20,10 @@
 
 .header-data {
     font-size: 36px;
+}
+
+.current-month {
+    color: #5167f4;
 }
 
 .header-right-side {
