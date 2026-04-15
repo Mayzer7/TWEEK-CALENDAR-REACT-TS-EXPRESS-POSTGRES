@@ -1,8 +1,8 @@
 export interface User {
   id: string;
+  username: string;
   email: string;
   password: string;
-  name: string;
   created_at: Date;
 }
 
@@ -18,5 +18,5 @@ export interface Task {
 }
 
 export interface AuthRequest extends Express.Request {
-  user?: { id: string; email: string };
+  user?: { id: string; email?: string; username?: string };
 }

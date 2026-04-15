@@ -18,13 +18,12 @@ interface DayCardProps {
   tasks: Task[];
   highlightedTaskId?: string | null;
   onUpdateTask: (taskId: string, text: string) => void;
-  onToggleTask: (taskId: string) => void;
   onSetTaskCompleted: (taskId: string, completed: boolean) => void;
   onAddTask: (text: string) => void;
   onDeleteTask: (taskId: string) => void;
 }
 
-export default function DayCard({ cardId, date, dateStr, tasks, highlightedTaskId, onUpdateTask, onToggleTask, onSetTaskCompleted, onAddTask, onDeleteTask }: DayCardProps) {
+export default function DayCard({ cardId, date, dateStr, tasks, highlightedTaskId, onUpdateTask, onSetTaskCompleted, onAddTask, onDeleteTask }: DayCardProps) {
   const BASE_COUNT = 7;
   const nowMoscow = new Date(
     new Date().toLocaleString("en-US", { timeZone: "Europe/Moscow" })

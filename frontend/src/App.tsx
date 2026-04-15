@@ -171,28 +171,6 @@ export default function App() {
     });
   }, []);
 
-  const toggleTaskCompleted = useCallback((dateStr: string, taskId: string) => {
-    const token = storage.getToken();
-    if (!token) return;
-
-    setTasksByDate(prev => {
-      const dayTasks = prev[dateStr] || [];
-      const task = dayTasks.find(t => t.id === taskId);
-      if (!task) return prev;
-
-      const newCompleted = !task.completed;
-      console.log("App toggleTaskCompleted:", { dateStr, taskId, oldCompleted: task.completed, newCompleted });
-      api.updateTask(token, taskId, { completed: newCompleted }).catch(console.error);
-
-      return {
-        ...prev,
-        [dateStr]: dayTasks.map(t =>
-          t.id === taskId ? { ...t, completed: newCompleted } : t
-        ),
-      };
-    });
-  }, []);
-
   const setTaskCompleted = useCallback((dateStr: string, taskId: string, completed: boolean) => {
     const token = storage.getToken();
     if (!token) return;
@@ -273,6 +251,7 @@ export default function App() {
           targetYear = parseInt(dateMatch[3]);
         }
       } else {
+        if (!dayMatch) return;
         targetDay = parseInt(dayMatch[1]);
       }
       
@@ -398,7 +377,6 @@ export default function App() {
               tasks={dayTasks}
               highlightedTaskId={highlightedTaskId}
               onUpdateTask={(taskId, text) => updateTaskText(dateStr, taskId, text)}
-              onToggleTask={(taskId) => toggleTaskCompleted(dateStr, taskId)}
               onSetTaskCompleted={(taskId, completed) => setTaskCompleted(dateStr, taskId, completed)}
               onAddTask={(text) => addTask(dateStr, text)}
               onDeleteTask={(taskId) => deleteTask(dateStr, taskId)}

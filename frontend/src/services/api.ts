@@ -2,8 +2,8 @@ const API_URL = "http://localhost:3001/api";
 
 interface User {
   id: string;
+  username: string;
   email: string;
-  name: string;
 }
 
 interface AuthResponse {
@@ -12,22 +12,22 @@ interface AuthResponse {
 }
 
 export const api = {
-  async register(email: string, password: string, name: string): Promise<AuthResponse> {
+  async register(username: string, email: string, password: string): Promise<AuthResponse> {
     const res = await fetch(`${API_URL}/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, name }),
+      body: JSON.stringify({ username, email, password }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Registration failed");
     return data;
   },
 
-  async login(email: string, password: string): Promise<AuthResponse> {
+  async login(username: string, password: string): Promise<AuthResponse> {
     const res = await fetch(`${API_URL}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ username, password }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Login failed");

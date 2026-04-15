@@ -43,8 +43,8 @@ export default function ProfileModal({ open, onClose, onLogout }: ProfileModalPr
 
             <div className="profile-info">
               <div className="profile-field">
-                <span className="profile-label">Имя</span>
-                <span className="profile-value">{user?.name || "Не указано"}</span>
+                <span className="profile-label">Логин</span>
+                <span className="profile-value">{user?.username || "Не указан"}</span>
               </div>
 
               <div className="profile-field">
