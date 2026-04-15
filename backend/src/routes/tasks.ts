@@ -149,4 +149,30 @@ router.get("/by-date/:date", async (req: AuthenticatedRequest, res: Response): P
   }
 });
 
+router.get("/search", async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const { q } = req.query;
+    
+    if (!q || typeof q !== "string" || q.trim().length === 0) {
+      res.json({ tasks: [] });
+      return;
+    }
+
+    const searchQuery = q.toLowerCase().trim();
+    
+    const result = await pool.query(
+      `SELECT id, user_id, TO_CHAR(date, 'YYYY-MM-DD') as date, text, completed, position, created_at, updated_at 
+       FROM tasks 
+       WHERE user_id = $1 AND LOWER(text) LIKE $2
+       ORDER BY date ASC, position ASC`,
+      [req.user!.id, `%${searchQuery}%`]
+    );
+
+    res.json({ tasks: result.rows });
+  } catch (error) {
+    console.error("Search tasks error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 export default router;

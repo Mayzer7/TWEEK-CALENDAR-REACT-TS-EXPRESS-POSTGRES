@@ -5,6 +5,7 @@ import Header from "./components/Calendar/Header";
 import DayCard, { type Task } from "./components/Calendar/DayCard";
 import AuthPage from "./components/Auth/AuthPage";
 import ProfileModal from "./components/Auth/ProfileModal";
+import SearchModal from "./components/Modals/SearchModal";
 import { storage, api } from "./services/api";
 
 interface DayTasks {
@@ -32,9 +33,28 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [highlightedTaskId, setHighlightedTaskId] = useState<string | null>(null);
   const hasScrolledRef = useRef(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const scrollTimeoutRef = useRef<number | null>(null);
+  const highlightTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (highlightedTaskId) {
+      if (highlightTimeoutRef.current) {
+        window.clearTimeout(highlightTimeoutRef.current);
+      }
+      highlightTimeoutRef.current = window.setTimeout(() => {
+        setHighlightedTaskId(null);
+      }, 3000);
+    }
+    return () => {
+      if (highlightTimeoutRef.current) {
+        window.clearTimeout(highlightTimeoutRef.current);
+      }
+    };
+  }, [highlightedTaskId]);
   
   useEffect(() => {
     const token = storage.getToken();
@@ -67,7 +87,6 @@ export default function App() {
   const [currentMonth, setCurrentMonth] = useState<number>(nowMoscow.getMonth());
   const [currentYear, setCurrentYear] = useState<number>(nowMoscow.getFullYear());
   const [tasksByDate, setTasksByDate] = useState<DayTasks>({});
-  const [tasksLoading, setTasksLoading] = useState(true);
 
   const fetchTasks = useCallback(() => {
     if (!isAuthenticated) return;
@@ -97,10 +116,8 @@ export default function App() {
           grouped[taskDate].push(task);
         });
         setTasksByDate(grouped);
-        setTasksLoading(false);
       })
       .catch(() => {
-        setTasksLoading(false);
       });
   }, [isAuthenticated, currentMonth, currentYear]);
 
@@ -117,14 +134,12 @@ export default function App() {
     storage.clear();
     setIsAuthenticated(false);
     setTasksByDate({});
-    setTasksLoading(true);
   };
 
   const changeMonth = (direction: number) => {
     const newDate = new Date(currentYear, currentMonth + direction, 1);
     setCurrentMonth(newDate.getMonth());
     setCurrentYear(newDate.getFullYear());
-    setTasksLoading(true);
   };
 
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
@@ -226,6 +241,99 @@ export default function App() {
     });
   }, []);
 
+  const MONTH_FULL = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
+  const MONTH_SHORT = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
+  const MONTH_PATTERN = MONTH_FULL.concat(MONTH_SHORT).join("|");
+
+  const handleSearch = useCallback(async (query: string) => {
+    const normalizedQuery = query.toLowerCase().trim();
+    const token = storage.getToken();
+    if (!token) return;
+    
+    const dayMatch = normalizedQuery.match(/^(\d{1,2})\s*(?:число|числа|числу)?$/);
+    const datePattern = new RegExp(`^(\\d{1,2})\\s+(${MONTH_PATTERN})(?:\\s+(\\d{4}))?$`, 'i');
+    const dateMatch = normalizedQuery.match(datePattern);
+    
+    if (dayMatch || dateMatch) {
+      let targetDay: number;
+      let targetMonth = currentMonth;
+      let targetYear = currentYear;
+      
+      if (dateMatch) {
+        targetDay = parseInt(dateMatch[1]);
+        const monthStr = dateMatch[2].toLowerCase();
+        let monthIndex = MONTH_FULL.findIndex(m => monthStr.includes(m));
+        if (monthIndex === -1) {
+          monthIndex = MONTH_SHORT.findIndex(m => monthStr.includes(m));
+        }
+        if (monthIndex !== -1) {
+          targetMonth = monthIndex;
+        }
+        if (dateMatch[3]) {
+          targetYear = parseInt(dateMatch[3]);
+        }
+      } else {
+        targetDay = parseInt(dayMatch[1]);
+      }
+      
+      if (targetMonth >= 0 && targetMonth <= 11) {
+        const container = scrollContainerRef.current;
+        if (container) {
+          const targetDateStr = `${targetYear}-${String(targetMonth + 1).padStart(2, '0')}-${String(targetDay).padStart(2, '0')}`;
+          
+          if (targetYear !== currentYear || targetMonth !== currentMonth) {
+            setCurrentYear(targetYear);
+            setCurrentMonth(targetMonth);
+          }
+          
+          setTimeout(() => {
+            const dayCard = document.querySelector(`[data-date="${targetDateStr}"]`);
+            if (dayCard && container) {
+              container.scrollTo({
+                top: dayCard.getBoundingClientRect().top + container.scrollTop - 80,
+                behavior: 'smooth'
+              });
+            }
+          }, 100);
+          return;
+        }
+      }
+    }
+    
+    try {
+      const searchResults = await api.searchTasks(token, normalizedQuery);
+      
+      if (searchResults.length > 0) {
+        const firstResult = searchResults[0];
+        const resultDate = firstResult.date;
+        
+        const [year, month] = resultDate.split('-');
+        const targetYear = parseInt(year);
+        const targetMonth = parseInt(month) - 1;
+        
+        if (targetYear !== currentYear || targetMonth !== currentMonth) {
+          setCurrentYear(targetYear);
+          setCurrentMonth(targetMonth);
+        }
+        
+        setHighlightedTaskId(firstResult.id);
+        
+        setTimeout(() => {
+          const taskRow = document.querySelector(`[data-task-id="${firstResult.id}"]`);
+          const container = scrollContainerRef.current;
+          if (taskRow && container) {
+            container.scrollTo({
+              top: taskRow.getBoundingClientRect().top + container.scrollTop - 80,
+              behavior: 'smooth'
+            });
+          }
+        }, 100);
+      }
+    } catch (err) {
+      console.error("Search failed:", err);
+    }
+  }, [currentMonth, currentYear]);
+
   if (loading) {
     return (
       <div className="auth-container">
@@ -261,6 +369,7 @@ export default function App() {
         onPrev={() => changeMonth(-1)}
         onNext={() => changeMonth(1)}
         onProfileClick={() => setProfileOpen(true)}
+        onSearchClick={() => setSearchOpen(true)}
       />
 
       <ProfileModal
@@ -269,22 +378,13 @@ export default function App() {
         onLogout={handleLogout}
       />
 
+      <SearchModal
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        onSearch={handleSearch}
+      />
+
       <div className="day-cards">
-        {tasksLoading && (
-          <div style={{ 
-            position: 'fixed', 
-            top: '50%', 
-            left: '50%', 
-            transform: 'translate(-50%, -50%)',
-            background: 'white',
-            padding: '20px 40px',
-            borderRadius: '12px',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-            zIndex: 2000
-          }}>
-            Загрузка заметок...
-          </div>
-        )}
         {dates.map((date, i) => {
           const dateStr = formatDateStr(date);
           const dayTasks = tasksByDate[dateStr] || [];
@@ -296,6 +396,7 @@ export default function App() {
               date={date}
               dateStr={dateStr}
               tasks={dayTasks}
+              highlightedTaskId={highlightedTaskId}
               onUpdateTask={(taskId, text) => updateTaskText(dateStr, taskId, text)}
               onToggleTask={(taskId) => toggleTaskCompleted(dateStr, taskId)}
               onSetTaskCompleted={(taskId, completed) => setTaskCompleted(dateStr, taskId, completed)}

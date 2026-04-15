@@ -16,6 +16,7 @@ interface DayCardProps {
   date: Date;
   dateStr: string;
   tasks: Task[];
+  highlightedTaskId?: string | null;
   onUpdateTask: (taskId: string, text: string) => void;
   onToggleTask: (taskId: string) => void;
   onSetTaskCompleted: (taskId: string, completed: boolean) => void;
@@ -23,7 +24,7 @@ interface DayCardProps {
   onDeleteTask: (taskId: string) => void;
 }
 
-export default function DayCard({ cardId, date, dateStr, tasks, onUpdateTask, onToggleTask, onSetTaskCompleted, onAddTask, onDeleteTask }: DayCardProps) {
+export default function DayCard({ cardId, date, dateStr, tasks, highlightedTaskId, onUpdateTask, onToggleTask, onSetTaskCompleted, onAddTask, onDeleteTask }: DayCardProps) {
   const BASE_COUNT = 7;
   const nowMoscow = new Date(
     new Date().toLocaleString("en-US", { timeZone: "Europe/Moscow" })
@@ -144,7 +145,7 @@ export default function DayCard({ cardId, date, dateStr, tasks, onUpdateTask, on
   ));
 
   return (
-    <div className={`day-card ${isToday ? "today-highlight" : ""}`}>
+    <div className={`day-card ${isToday ? "today-highlight" : ""}`} data-date={dateStr}>
       <div className="day-card-header">
         <p className="data-number">
           {date.getDate()} {date.toLocaleString("ru-RU", { month: "short" })}
@@ -158,8 +159,9 @@ export default function DayCard({ cardId, date, dateStr, tasks, onUpdateTask, on
         {savedTasks.map(task => (
           <div
             key={task.id}
-            className={`task-row ${task.text.trim() === "" ? "empty-task" : ""}`}
+            className={`task-row ${task.text.trim() === "" ? "empty-task" : ""} ${highlightedTaskId === task.id ? "task-highlighted" : ""}`}
             onClick={() => handleTaskClick(task.id)}
+            data-task-id={task.id}
           >
             <input
               className={`task-input ${task.completed ? "completed-text" : ""}`}

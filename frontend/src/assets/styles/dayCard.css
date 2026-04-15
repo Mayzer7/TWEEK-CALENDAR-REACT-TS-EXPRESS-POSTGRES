@@ -52,6 +52,11 @@
     color: rgba(81, 103, 244, 0.5); 
 }
 
+.day-card:has(.task-highlighted) .day-card-header {
+    border-bottom-color: #5167f4;
+    transition: border-bottom-color 3s ease-out;
+}
+
 .data-number,
 .data-day {
     font-size: 21px;
@@ -83,6 +88,18 @@
 .task-row:focus-within,
 .task-row.input-focused {
     border-bottom: 1px solid #2d3fa5;
+}
+
+.task-highlighted {
+    background-color: rgba(81, 103, 244, 0.15);
+    border-bottom-color: #5167f4 !important;
+    transition: background-color 3s ease-out;
+}
+
+@keyframes highlightPulse {
+    0% { background-color: rgba(81, 103, 244, 0.3); }
+    50% { background-color: rgba(81, 103, 244, 0.2); }
+    100% { background-color: rgba(81, 103, 244, 0.15); }
 }
 
 .task-input {

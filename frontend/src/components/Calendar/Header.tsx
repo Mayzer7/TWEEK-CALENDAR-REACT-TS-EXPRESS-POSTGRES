@@ -8,6 +8,7 @@ interface HeaderProps {
   onPrev: () => void;
   onNext: () => void;
   onProfileClick?: () => void;
+  onSearchClick?: () => void;
 }
 
 const MONTHS = [
@@ -15,7 +16,7 @@ const MONTHS = [
   "Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"
 ];
 
-export default function Header({ month, year, currentRealMonth, currentRealYear, onPrev, onNext, onProfileClick }: HeaderProps) {
+export default function Header({ month, year, currentRealMonth, currentRealYear, onPrev, onNext, onProfileClick, onSearchClick }: HeaderProps) {
   const isCurrentMonth = month === currentRealMonth && year === currentRealYear;
 
   return (
@@ -36,11 +37,11 @@ export default function Header({ month, year, currentRealMonth, currentRealYear,
               </svg>
           </button>
 
-          <button className="more-btn">
+          <button className="search-btn" onClick={onSearchClick}>
             <svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect width="42" height="42" rx="21" fill="#BE9CF3"/>
-              <circle cx="19" cy="19" r="7" stroke="black" stroke-width="2"/>
-              <line x1="24.41" y1="23.8915" x2="29.8915" y2="28.59" stroke="black" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="19" cy="19" r="7" stroke="black" strokeWidth="2"/>
+              <line x1="24.41" y1="23.8915" x2="29.8915" y2="28.59" stroke="black" strokeWidth="2" strokeLinecap="round"/>
             </svg>
           </button>
 

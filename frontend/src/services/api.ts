@@ -103,6 +103,15 @@ export const api = {
     if (!res.ok) throw new Error(data.error || "Failed to get tasks");
     return data.tasks;
   },
+
+  async searchTasks(token: string, query: string) {
+    const res = await fetch(`${API_URL}/tasks/search?q=${encodeURIComponent(query)}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to search tasks");
+    return data.tasks;
+  },
 };
 
 export const storage = {
