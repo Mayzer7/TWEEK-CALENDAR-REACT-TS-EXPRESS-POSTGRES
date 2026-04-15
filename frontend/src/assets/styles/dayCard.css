@@ -11,6 +11,23 @@
 
 .day-card {
     padding: 6px;
+    display: flex;
+    flex-direction: column;
+    contain: layout style;
+}
+
+.day-card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    contain: layout style;
+}
+
+.day-cards {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    contain: layout style;
 }
 
 .day-card-header {
@@ -50,9 +67,7 @@
     align-items: center;
     border-bottom: 1px solid #e2e2e2;
     padding: 10px 0;
-    transition: all 0.2s ease-in-out;
-    opacity: 1;
-    animation: fadeIn 0.25s ease;
+    contain: content;
 }
 
 .task-row.clickable {
@@ -60,11 +75,13 @@
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-5px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
-.task-row:hover {
+.task-row:hover,
+.task-row:focus-within,
+.task-row.input-focused {
     border-bottom: 1px solid #2d3fa5;
 }
 
@@ -94,6 +111,7 @@
     position: absolute;
     opacity: 0;
     pointer-events: none;
+    contain: layout style;
 }
 
 .checkbox-wrapper {
@@ -105,14 +123,7 @@
     transition: opacity 0.2s ease-in-out;
 }
 
-.fade-in {
-    animation: fadeCheck 0.2s ease;
-}
 
-@keyframes fadeCheck {
-    from { opacity: 0; transform: scale(0.6); }
-    to { opacity: 1; transform: scale(1); }
-}
 
 .checkbox-fake {
     width: 20px;

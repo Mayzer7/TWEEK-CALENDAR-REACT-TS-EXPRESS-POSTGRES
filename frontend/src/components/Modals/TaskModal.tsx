@@ -7,9 +7,10 @@ import {
 import "/src/assets/styles/taskModal.css";
 
 type Task = {
-  id: number;
+  id: string;
   text: string;
   completed: boolean;
+  position?: number;
 };
 
 type Props = {
@@ -17,7 +18,7 @@ type Props = {
   date: Date;
   onClose: () => void;
   onSave: (task: Task) => void;
-  onDelete: (id: number) => void;
+  onDelete: (id: string) => void;
 };
 
 export default function TaskModal({

@@ -7,6 +7,7 @@ interface HeaderProps {
   currentRealYear: number;
   onPrev: () => void;
   onNext: () => void;
+  onProfileClick?: () => void;
 }
 
 const MONTHS = [
@@ -14,7 +15,7 @@ const MONTHS = [
   "Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"
 ];
 
-export default function Header({ month, year, currentRealMonth, currentRealYear, onPrev, onNext }: HeaderProps) {
+export default function Header({ month, year, currentRealMonth, currentRealYear, onPrev, onNext, onProfileClick }: HeaderProps) {
   const isCurrentMonth = month === currentRealMonth && year === currentRealYear;
 
   return (
@@ -27,7 +28,7 @@ export default function Header({ month, year, currentRealMonth, currentRealYear,
         </div>
 
         <div className="header-right-side">
-          <button className="profile">
+          <button className="profile" onClick={onProfileClick} title="Профиль">
               <svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="42" height="42" rx="21" fill="#DCE1FD"/>
                 <path d="M30 27C30 24.7908 27.9854 23 25.5 23H16.5C14.0147 23 12 24.7908 12 27V31H30V27Z" fill="black"/>

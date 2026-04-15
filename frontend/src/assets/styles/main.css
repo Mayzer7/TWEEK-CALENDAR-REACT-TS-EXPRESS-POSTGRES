@@ -34,12 +34,18 @@ body {
 html {  
   box-sizing: border-box;
   overflow-x: hidden;
+  height: 100%;
+  overflow-anchor: none;
 }
 body,
 html {
   margin: 0;
   padding: 0;
+  height: 100%;
+  overflow: hidden;
+  overflow-anchor: none;
 }
+
 * {
   -webkit-tap-highlight-color: transparent;
 }
@@ -67,10 +73,12 @@ p {
 }
 
 .container {
-    padding: 24px 24px 48px;
+    padding: 0px 24px 24px 48px;
     min-width: 340px;
     height: 100vh;
     overflow-y: auto;
+    overflow-anchor: none;
+    scroll-behavior: auto;
 }
 
 button {
@@ -79,4 +87,35 @@ button {
   padding: 0;
   margin: 0;
   cursor: pointer;
+}
+
+/* Кастомный скролл */
+
+.container::-webkit-scrollbar {
+  width: 10px; 
+}
+
+.container::-webkit-scrollbar-thumb {
+  background-color: #5167f4;
+  border-radius: 8px;
+
+  border: 2px solid transparent; 
+  background-clip: content-box;  
+}
+
+.container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.container::-webkit-scrollbar-button {
+  display: none;
+}
+
+/* Кастомный скролл для Firefox */
+
+@-moz-document url-prefix() {
+  * {
+    scrollbar-color: #5167f4 white; 
+    scrollbar-width: thin; 
+  }
 }

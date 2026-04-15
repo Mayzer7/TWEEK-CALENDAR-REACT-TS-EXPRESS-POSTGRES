@@ -3,13 +3,15 @@
 }
 
 .header {
-    position: fixed;
+    position: sticky;
     top: 0;
     left: 0;
     width: 100%;
     background: white;
     z-index: 1000;
-    padding: 14px 24px; 
+    padding-top: 24px;
+    padding-bottom: 14px;
+    box-sizing: border-box;
 }
 
 .header-content {
