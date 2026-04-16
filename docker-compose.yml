@@ -19,6 +19,8 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    env_file:
+      - ./backend/.env
     environment:
       PORT: 3001
       DATABASE_URL: postgresql://postgres:mayzer@db:5432/calendar_db

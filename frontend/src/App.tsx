@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import "/src/assets/styles/main.css";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import Header from "./components/Calendar/Header";
 import DayCard, { type Task } from "./components/Calendar/DayCard";
 import AuthPage from "./components/Auth/AuthPage";
 import ProfileModal from "./components/Auth/ProfileModal";
 import SearchModal from "./components/Modals/SearchModal";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import { storage, api } from "./services/api";
 
 interface DayTasks {
@@ -323,67 +326,91 @@ export default function App() {
     );
   }
 
-  if (!isAuthenticated) {
-    return <AuthPage onAuthSuccess={handleAuthSuccess} />;
-  }
-
   return (
-    <div 
-        className="container" 
-        ref={scrollContainerRef}
-        onScroll={() => {
-          if (scrollTimeoutRef.current) {
-            window.clearTimeout(scrollTimeoutRef.current);
-          }
-          scrollTimeoutRef.current = window.setTimeout(() => {
-            hasScrolledRef.current = true;
-          }, 100);
-        }}
-      >
-      <Header
-        month={currentMonth}
-        year={currentYear}
-        currentRealMonth={nowMoscow.getMonth()}
-        currentRealYear={nowMoscow.getFullYear()}
-        onPrev={() => changeMonth(-1)}
-        onNext={() => changeMonth(1)}
-        onProfileClick={() => setProfileOpen(true)}
-        onSearchClick={() => setSearchOpen(true)}
+    <Routes>
+      <Route
+        path="/forgot-password"
+        element={
+          isAuthenticated ? <Navigate to="/" replace /> : <ForgotPasswordPage />
+        }
       />
-
-      <ProfileModal
-        open={profileOpen}
-        onClose={() => setProfileOpen(false)}
-        onLogout={handleLogout}
+      <Route
+        path="/reset-password"
+        element={
+          isAuthenticated ? <Navigate to="/" replace /> : <ResetPasswordPage />
+        }
       />
+      <Route
+        path="/"
+        element={
+          !isAuthenticated ? (
+            <AuthPage onAuthSuccess={handleAuthSuccess} />
+          ) : (
+            <div
+              className="container"
+              ref={scrollContainerRef}
+              onScroll={() => {
+                if (scrollTimeoutRef.current) {
+                  window.clearTimeout(scrollTimeoutRef.current);
+                }
+                scrollTimeoutRef.current = window.setTimeout(() => {
+                  hasScrolledRef.current = true;
+                }, 100);
+              }}
+            >
+              <Header
+                month={currentMonth}
+                year={currentYear}
+                currentRealMonth={nowMoscow.getMonth()}
+                currentRealYear={nowMoscow.getFullYear()}
+                onPrev={() => changeMonth(-1)}
+                onNext={() => changeMonth(1)}
+                onProfileClick={() => setProfileOpen(true)}
+                onSearchClick={() => setSearchOpen(true)}
+              />
 
-      <SearchModal
-        open={searchOpen}
-        onClose={() => setSearchOpen(false)}
-        onSearch={handleSearch}
+              <ProfileModal
+                open={profileOpen}
+                onClose={() => setProfileOpen(false)}
+                onLogout={handleLogout}
+              />
+
+              <SearchModal
+                open={searchOpen}
+                onClose={() => setSearchOpen(false)}
+                onSearch={handleSearch}
+              />
+
+              <div className="day-cards">
+                {dates.map((date, i) => {
+                  const dateStr = formatDateStr(date);
+                  const dayTasks = tasksByDate[dateStr] || [];
+
+                  return (
+                    <DayCard
+                      key={dateStr}
+                      cardId={i + 1}
+                      date={date}
+                      dateStr={dateStr}
+                      tasks={dayTasks}
+                      highlightedTaskId={highlightedTaskId}
+                      onUpdateTask={(taskId, text) =>
+                        updateTaskText(dateStr, taskId, text)
+                      }
+                      onSetTaskCompleted={(taskId, completed) =>
+                        setTaskCompleted(dateStr, taskId, completed)
+                      }
+                      onAddTask={(text) => addTask(dateStr, text)}
+                      onDeleteTask={(taskId) => deleteTask(dateStr, taskId)}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          )
+        }
       />
-
-      <div className="day-cards">
-        {dates.map((date, i) => {
-          const dateStr = formatDateStr(date);
-          const dayTasks = tasksByDate[dateStr] || [];
-          
-          return (
-            <DayCard
-              key={dateStr}
-              cardId={i + 1}
-              date={date}
-              dateStr={dateStr}
-              tasks={dayTasks}
-              highlightedTaskId={highlightedTaskId}
-              onUpdateTask={(taskId, text) => updateTaskText(dateStr, taskId, text)}
-              onSetTaskCompleted={(taskId, completed) => setTaskCompleted(dateStr, taskId, completed)}
-              onAddTask={(text) => addTask(dateStr, text)}
-              onDeleteTask={(taskId) => deleteTask(dateStr, taskId)}
-            />
-          );
-        })}
-      </div>
-    </div>
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }

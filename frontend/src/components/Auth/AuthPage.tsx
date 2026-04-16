@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { api, storage } from "../../services/api";
 import "./auth.css";
 
@@ -173,6 +174,13 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
               {isLogin ? "Зарегистрироваться" : "Войти"}
             </button>
           </p>
+          {isLogin && (
+            <p style={{ marginTop: 10 }}>
+              <Link className="auth-link" to="/forgot-password">
+                Забыли пароль?
+              </Link>
+            </p>
+          )}
         </div>
       </div>
     </div>

@@ -61,6 +61,30 @@ export async function initDatabase() {
       CREATE INDEX IF NOT EXISTS idx_tasks_user_date ON tasks(user_id, date)
     `);
 
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS password_reset_tokens (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        token_hash TEXT NOT NULL,
+        expires_at TIMESTAMP NOT NULL,
+        used_at TIMESTAMP NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await client.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS password_reset_tokens_token_hash_unique_idx
+      ON password_reset_tokens (token_hash)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS password_reset_tokens_user_id_idx
+      ON password_reset_tokens (user_id)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS password_reset_tokens_expires_at_idx
+      ON password_reset_tokens (expires_at)
+    `);
+
     console.log("Database initialized successfully");
   } finally {
     client.release();
