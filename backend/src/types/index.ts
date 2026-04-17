@@ -4,6 +4,7 @@ export interface User {
   email: string;
   password: string;
   created_at: Date;
+  avatar?: string;
 }
 
 export interface Task {

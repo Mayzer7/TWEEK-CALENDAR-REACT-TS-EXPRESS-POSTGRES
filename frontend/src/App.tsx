@@ -34,6 +34,7 @@ function parseDateToString(value: unknown): string {
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(storage.getUser());
   const [loading, setLoading] = useState(true);
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -63,6 +64,7 @@ export default function App() {
     const token = storage.getToken();
     if (token) {
       setIsAuthenticated(true);
+      setUser(storage.getUser());
     }
     setLoading(false);
   }, []);
@@ -130,12 +132,18 @@ export default function App() {
 
   const handleAuthSuccess = () => {
     setIsAuthenticated(true);
+    setUser(storage.getUser());
     hasScrolledRef.current = false;
+  };
+
+  const handleUserUpdate = () => {
+    setUser(storage.getUser());
   };
 
   const handleLogout = () => {
     storage.clear();
     setIsAuthenticated(false);
+    setUser(null);
     setTasksByDate({});
   };
 
@@ -358,22 +366,25 @@ export default function App() {
                 }, 100);
               }}
             >
-              <Header
-                month={currentMonth}
-                year={currentYear}
-                currentRealMonth={nowMoscow.getMonth()}
-                currentRealYear={nowMoscow.getFullYear()}
-                onPrev={() => changeMonth(-1)}
-                onNext={() => changeMonth(1)}
-                onProfileClick={() => setProfileOpen(true)}
-                onSearchClick={() => setSearchOpen(true)}
-              />
+               <Header
+                 month={currentMonth}
+                 year={currentYear}
+                 currentRealMonth={nowMoscow.getMonth()}
+                 currentRealYear={nowMoscow.getFullYear()}
+                 onPrev={() => changeMonth(-1)}
+                 onNext={() => changeMonth(1)}
+                 onProfileClick={() => setProfileOpen(true)}
+                 onSearchClick={() => setSearchOpen(true)}
+                 avatar={user?.avatar}
+               />
 
-              <ProfileModal
-                open={profileOpen}
-                onClose={() => setProfileOpen(false)}
-                onLogout={handleLogout}
-              />
+               <ProfileModal
+                 open={profileOpen}
+                 onClose={() => setProfileOpen(false)}
+                 onLogout={handleLogout}
+                 onUserUpdate={handleUserUpdate}
+               />
+
 
               <SearchModal
                 open={searchOpen}

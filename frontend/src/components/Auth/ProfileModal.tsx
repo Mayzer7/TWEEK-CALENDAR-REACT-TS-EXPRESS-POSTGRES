@@ -1,20 +1,48 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross2Icon } from "@radix-ui/react-icons";
-import { storage } from "../../services/api";
+import { useState, useRef } from "react";
+import { api, storage } from "../../services/api";
 import "./profile.css";
 
 interface ProfileModalProps {
   open: boolean;
   onClose: () => void;
   onLogout: () => void;
+  onUserUpdate?: () => void;
 }
 
-export default function ProfileModal({ open, onClose, onLogout }: ProfileModalProps) {
-  const user = storage.getUser();
+export default function ProfileModal({ open, onClose, onLogout, onUserUpdate }: ProfileModalProps) {
+  const [user, setUser] = useState(storage.getUser());
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleLogout = () => {
     onLogout();
     onClose();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const avatarUrl = e.target?.result as string;
+      const token = storage.getToken();
+      
+      if (!token) return;
+
+      try {
+        await api.updateAvatar(token, avatarUrl);
+        const updatedUser = { ...user, avatar: avatarUrl };
+        storage.setUser(updatedUser);
+        setUser(updatedUser);
+        if (onUserUpdate) onUserUpdate();
+      } catch (error) {
+        console.error("Failed to upload avatar:", error);
+        alert("Ошибка при загрузке аватара");
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -33,12 +61,26 @@ export default function ProfileModal({ open, onClose, onLogout }: ProfileModalPr
           </div>
 
           <div className="profile-body">
-            <div className="profile-avatar">
-              <svg width="80" height="80" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="42" height="42" rx="21" fill="#DCE1FD"/>
-                <path d="M30 27C30 24.7908 27.9854 23 25.5 23H16.5C14.0147 23 12 24.7908 12 27V31H30V27Z" fill="black"/>
-                <path d="M21 20C23.7614 20 26 17.7614 26 15C26 12.2386 23.7614 10 21 10C18.2386 10 16 12.2386 16 15C16 17.7614 18.2386 20 21 20Z" fill="black"/>
-              </svg>
+            <div className="profile-avatar-container" onClick={() => fileInputRef.current?.click()}>
+              {user?.avatar ? (
+                <img src={user.avatar} alt="Avatar" className="profile-avatar-img" />
+              ) : (
+                <div className="profile-avatar-placeholder">
+                  <svg width="80" height="80" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="42" height="42" rx="21" fill="#DCE1FD"/>
+                    <path d="M30 27C30 24.7908 27.9854 23 25.5 23H16.5C14.0147 23 12 24.7908 12 27V31H30V27Z" fill="black"/>
+                    <path d="M21 20C23.7614 20 26 17.7614 26 15C26 12.2386 23.7614 10 21 10C18.2386 10 16 12.2386 16 15C16 17.7614 18.2386 20 21 20Z" fill="black"/>
+                  </svg>
+                </div>
+              )}
+              <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: "none" }}
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+              <div className="profile-avatar-overlay">Изменить фото</div>
             </div>
 
             <div className="profile-info">

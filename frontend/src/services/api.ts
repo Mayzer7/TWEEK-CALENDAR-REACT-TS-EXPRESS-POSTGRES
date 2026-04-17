@@ -5,6 +5,7 @@ interface User {
   id: string;
   username: string;
   email: string;
+  avatar?: string;
 }
 
 interface AuthResponse {
@@ -129,12 +130,28 @@ export const api = {
 
   async searchTasks(token: string, query: string) {
     const res = await fetch(`${API_URL}/tasks/search?q=${encodeURIComponent(query)}`, {
+      method: "GET",
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Failed to search tasks");
     return data.tasks;
   },
+
+  async updateAvatar(token: string, avatar: string) {
+    const res = await fetch(`${API_URL}/auth/me/avatar`, {
+      method: "PATCH",
+      headers: { 
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}` 
+      },
+      body: JSON.stringify({ avatar }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to update avatar");
+    return data;
+  },
+
 };
 
 export const storage = {

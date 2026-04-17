@@ -37,7 +37,7 @@ router.post("/register", async (req: Request, res: Response): Promise<void> => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const result = await pool.query(
-      "INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id, username, email, created_at",
+      "INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id, username, email, avatar, created_at",
       [normalizedUsername, normalizedEmail, hashedPassword]
     );
 
@@ -55,6 +55,7 @@ router.post("/register", async (req: Request, res: Response): Promise<void> => {
         id: user.id,
         username: user.username,
         email: user.email,
+        avatar: user.avatar,
       },
     });
   } catch (error) {
@@ -75,7 +76,7 @@ router.post("/login", async (req: Request, res: Response): Promise<void> => {
     const normalizedUsername = String(username).trim().toLowerCase();
 
     const result = await pool.query(
-      "SELECT id, username, email, password, created_at FROM users WHERE username = $1",
+      "SELECT id, username, email, avatar, password, created_at FROM users WHERE username = $1",
       [normalizedUsername]
     );
 
@@ -104,6 +105,7 @@ router.post("/login", async (req: Request, res: Response): Promise<void> => {
         id: user.id,
         username: user.username,
         email: user.email,
+        avatar: user.avatar,
       },
     });
   } catch (error) {
@@ -129,7 +131,7 @@ router.get("/me", async (req: Request, res: Response): Promise<void> => {
     ) as { id: string; email?: string; username?: string };
 
     const result = await pool.query(
-      "SELECT id, username, email, created_at FROM users WHERE id = $1",
+      "SELECT id, username, email, avatar, created_at FROM users WHERE id = $1",
       [decoded.id]
     );
 
@@ -277,6 +279,40 @@ router.post("/reset-password", async (req: Request, res: Response): Promise<void
   } catch (error) {
     console.error("Reset password error:", error);
     res.status(500).json({ error: "Не удалось обновить пароль" });
+  }
+});
+
+router.patch("/me/avatar", async (req: Request, res: Response): Promise<void> => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    res.status(401).json({ error: "No token provided" });
+    return;
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  try {
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "your-super-secret-jwt-key-change-in-production"
+    ) as { id: string };
+
+    const { avatar } = req.body;
+
+    if (avatar === undefined) {
+      res.status(400).json({ error: "Avatar is required" });
+      return;
+    }
+
+    await pool.query(
+      "UPDATE users SET avatar = $1 WHERE id = $2",
+      [avatar, decoded.id]
+    );
+
+    res.json({ message: "Avatar updated successfully" });
+  } catch {
+    res.status(401).json({ error: "Invalid token" });
   }
 });
 
