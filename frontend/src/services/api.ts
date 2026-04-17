@@ -94,7 +94,7 @@ export const api = {
     return data.task;
   },
 
-  async updateTask(token: string, id: string, updates: { text?: string; completed?: boolean; position?: number }) {
+  async updateTask(token: string, id: string, updates: { text?: string; completed?: boolean; position?: number; date?: string }) {
     const res = await fetch(`${API_URL}/tasks/${id}`, {
       method: "PUT",
       headers: {

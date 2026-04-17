@@ -123,6 +123,19 @@ router.put("/:id", async (req: AuthenticatedRequest, res: Response): Promise<voi
   try {
     const { id } = req.params;
     const { text, completed, position, date } = req.body;
+    const userId = req.user!.id as string;
+
+    const existingTaskResult = await pool.query(
+      "SELECT id, TO_CHAR(date, 'YYYY-MM-DD') as date, position FROM tasks WHERE id = $1 AND user_id = $2",
+      [id as string, userId]
+    );
+
+    if (existingTaskResult.rows.length === 0) {
+      res.status(404).json({ error: "Task not found" });
+      return;
+    }
+
+    const existingTask = existingTaskResult.rows[0] as { date: string; position: number };
 
     const updateFields: string[] = [];
     const values: (string | boolean | number)[] = [];
@@ -141,6 +154,17 @@ router.put("/:id", async (req: AuthenticatedRequest, res: Response): Promise<voi
       values.push(position);
     }
     if (date !== undefined) {
+      // If task moves to another day without explicit position, place it at end
+      // to avoid UNIQUE(user_id, date, position) conflicts.
+      if (position === undefined && date !== existingTask.date) {
+        const maxPositionResult = await pool.query(
+          "SELECT COALESCE(MAX(position), -1) + 1 as next_position FROM tasks WHERE user_id = $1 AND date = $2 AND id <> $3",
+          [userId, date, id as string]
+        );
+        const nextPosition = Number(maxPositionResult.rows[0].next_position);
+        updateFields.push(`position = $${paramIndex++}`);
+        values.push(nextPosition);
+      }
       updateFields.push(`date = $${paramIndex++}`);
       values.push(date);
     }
@@ -152,7 +176,7 @@ router.put("/:id", async (req: AuthenticatedRequest, res: Response): Promise<voi
       return;
     }
 
-    values.push(id as string, req.user!.id as string);
+    values.push(id as string, userId);
 
     const result = await pool.query(
       `UPDATE tasks SET ${updateFields.join(", ")} 
@@ -160,11 +184,6 @@ router.put("/:id", async (req: AuthenticatedRequest, res: Response): Promise<voi
        RETURNING id, user_id, TO_CHAR(date, 'YYYY-MM-DD') as date, text, completed, position, created_at, updated_at`,
       values
     );
-
-    if (result.rows.length === 0) {
-      res.status(404).json({ error: "Task not found" });
-      return;
-    }
 
     res.json({ task: result.rows[0] });
   } catch (error) {

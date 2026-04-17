@@ -109,6 +109,53 @@
     background: rgba(81, 103, 244, 0.06);
 }
 
+.month-edge-drop {
+    position: fixed;
+    top: 72px;
+    bottom: 0;
+    width: 56px;
+    z-index: 30;
+    opacity: 0;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s ease;
+}
+
+.month-edge-drop.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.month-edge-drop-prev {
+    left: 0;
+    background: linear-gradient(90deg, rgba(81, 103, 244, 0.13) 0%, rgba(81, 103, 244, 0) 100%);
+}
+
+.month-edge-drop-next {
+    right: 0;
+    background: linear-gradient(270deg, rgba(81, 103, 244, 0.13) 0%, rgba(81, 103, 244, 0) 100%);
+}
+
+.month-edge-drop-indicator {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    background: rgba(81, 103, 244, 0.15);
+    color: #2d3fa5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: scale(0.92);
+    transition: transform 0.18s ease, background-color 0.18s ease;
+}
+
+.month-edge-drop.hovered .month-edge-drop-indicator {
+    transform: scale(1);
+    background: rgba(81, 103, 244, 0.24);
+}
+
 .task-highlighted {
     background-color: rgba(81, 103, 244, 0.15);
     border-bottom-color: #5167f4 !important;
