@@ -152,6 +152,23 @@ export const api = {
     return data;
   },
 
+  async reorderTasks(
+    token: string,
+    updates: Array<{ id: string; date: string; position: number }>
+  ) {
+    const res = await fetch(`${API_URL}/tasks/reorder`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ updates }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to reorder tasks");
+    return data;
+  },
+
 };
 
 export const storage = {

@@ -1,6 +1,18 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import "/src/assets/styles/main.css";
 import { Routes, Route, Navigate } from "react-router-dom";
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  TouchSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragStartEvent,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { arrayMove } from "@dnd-kit/sortable";
 
 import Header from "./components/Calendar/Header";
 import DayCard, { type Task } from "./components/Calendar/DayCard";
@@ -92,6 +104,11 @@ export default function App() {
   const [currentMonth, setCurrentMonth] = useState<number>(nowMoscow.getMonth());
   const [currentYear, setCurrentYear] = useState<number>(nowMoscow.getFullYear());
   const [tasksByDate, setTasksByDate] = useState<DayTasks>({});
+  const [activeDragTask, setActiveDragTask] = useState<Task | null>(null);
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 120, tolerance: 8 } })
+  );
 
   const fetchTasks = useCallback(() => {
     if (!isAuthenticated) return;
@@ -229,6 +246,117 @@ export default function App() {
       };
     });
   }, []);
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    const activeId = String(event.active.id);
+    for (const [day, dayTasks] of Object.entries(tasksByDate)) {
+      const task = dayTasks.find((item) => item.id === activeId);
+      if (task) {
+        setActiveDragTask({ ...task, date: day });
+        break;
+      }
+    }
+  }, [tasksByDate]);
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const token = storage.getToken();
+    setActiveDragTask(null);
+
+    const { active, over } = event;
+    if (!over || !token) return;
+
+    const activeId = String(active.id);
+    const activeData = active.data.current as { type?: string; dateStr?: string } | undefined;
+    const overData = over.data.current as { type?: string; dateStr?: string } | undefined;
+
+    const sourceDate = activeData?.dateStr;
+    if (!sourceDate) return;
+
+    const targetDate = overData?.dateStr || sourceDate;
+    const overId = String(over.id);
+
+    const sourceTasks = tasksByDate[sourceDate] || [];
+    const activeTask = sourceTasks.find((task) => task.id === activeId);
+    if (!activeTask) return;
+
+    const targetTasks = tasksByDate[targetDate] || [];
+    const sourceIndex = sourceTasks.findIndex((task) => task.id === activeId);
+
+    if (sourceIndex < 0) return;
+
+    let nextTasksByDate = tasksByDate;
+    let updates: Array<{ id: string; date: string; position: number }> = [];
+
+    if (sourceDate === targetDate) {
+      const overIndex = targetTasks.findIndex((task) => task.id === overId);
+      const destinationIndex = overData?.type === "day" || overIndex < 0 ? targetTasks.length - 1 : overIndex;
+
+      if (sourceIndex === destinationIndex) return;
+
+      const reordered = arrayMove(sourceTasks, sourceIndex, destinationIndex).map((task, index) => ({
+        ...task,
+        position: index,
+        date: sourceDate,
+      }));
+
+      nextTasksByDate = {
+        ...tasksByDate,
+        [sourceDate]: reordered,
+      };
+
+      updates = reordered.map((task, index) => ({
+        id: task.id,
+        date: sourceDate,
+        position: index,
+      }));
+    } else {
+      const sourceWithoutTask = sourceTasks.filter((task) => task.id !== activeId);
+      const overIndex = targetTasks.findIndex((task) => task.id === overId);
+      const destinationIndex = overData?.type === "day" || overIndex < 0 ? targetTasks.length : overIndex;
+
+      const nextTargetTasks = [...targetTasks];
+      nextTargetTasks.splice(destinationIndex, 0, { ...activeTask, date: targetDate });
+
+      const normalizedSource = sourceWithoutTask.map((task, index) => ({
+        ...task,
+        position: index,
+        date: sourceDate,
+      }));
+      const normalizedTarget = nextTargetTasks.map((task, index) => ({
+        ...task,
+        position: index,
+        date: targetDate,
+      }));
+
+      nextTasksByDate = {
+        ...tasksByDate,
+        [sourceDate]: normalizedSource,
+        [targetDate]: normalizedTarget,
+      };
+
+      updates = [
+        ...normalizedSource.map((task, index) => ({
+          id: task.id,
+          date: sourceDate,
+          position: index,
+        })),
+        ...normalizedTarget.map((task, index) => ({
+          id: task.id,
+          date: targetDate,
+          position: index,
+        })),
+      ];
+    }
+
+    const previousTasksByDate = tasksByDate;
+    setTasksByDate(nextTasksByDate);
+
+    api.reorderTasks(token, updates).catch((error) => {
+      console.error("Reorder failed:", error);
+      setTasksByDate(previousTasksByDate);
+      fetchTasks();
+    });
+  }, [tasksByDate, fetchTasks]);
 
   const MONTH_FULL = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
   const MONTH_SHORT = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
@@ -392,31 +520,56 @@ export default function App() {
                 onSearch={handleSearch}
               />
 
-              <div className="day-cards">
-                {dates.map((date, i) => {
-                  const dateStr = formatDateStr(date);
-                  const dayTasks = tasksByDate[dateStr] || [];
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+              >
+                <div className="day-cards">
+                  {dates.map((date, i) => {
+                    const dateStr = formatDateStr(date);
+                    const dayTasks = tasksByDate[dateStr] || [];
 
-                  return (
-                    <DayCard
-                      key={dateStr}
-                      cardId={i + 1}
-                      date={date}
-                      dateStr={dateStr}
-                      tasks={dayTasks}
-                      highlightedTaskId={highlightedTaskId}
-                      onUpdateTask={(taskId, text) =>
-                        updateTaskText(dateStr, taskId, text)
-                      }
-                      onSetTaskCompleted={(taskId, completed) =>
-                        setTaskCompleted(dateStr, taskId, completed)
-                      }
-                      onAddTask={(text) => addTask(dateStr, text)}
-                      onDeleteTask={(taskId) => deleteTask(dateStr, taskId)}
-                    />
-                  );
-                })}
-              </div>
+                    return (
+                      <DayCard
+                        key={dateStr}
+                        cardId={i + 1}
+                        date={date}
+                        dateStr={dateStr}
+                        tasks={dayTasks}
+                        highlightedTaskId={highlightedTaskId}
+                        onUpdateTask={(taskId, text) =>
+                          updateTaskText(dateStr, taskId, text)
+                        }
+                        onSetTaskCompleted={(taskId, completed) =>
+                          setTaskCompleted(dateStr, taskId, completed)
+                        }
+                        onAddTask={(text) => addTask(dateStr, text)}
+                        onDeleteTask={(taskId) => deleteTask(dateStr, taskId)}
+                      />
+                    );
+                  })}
+                </div>
+
+                <DragOverlay>
+                  {activeDragTask ? (
+                    <div className="task-row task-row-overlay">
+                      <div className="task-drag-handle" aria-hidden="true">
+                        <svg width="14" height="14" viewBox="0 0 14 14">
+  <circle cx="7" cy="7" r="2" fill="currentColor" />
+</svg>
+                      </div>
+                      <input
+                        className={`task-input ${activeDragTask.completed ? "completed-text" : ""}`}
+                        type="text"
+                        readOnly
+                        value={activeDragTask.text}
+                      />
+                    </div>
+                  ) : null}
+                </DragOverlay>
+              </DndContext>
             </div>
           )
         }

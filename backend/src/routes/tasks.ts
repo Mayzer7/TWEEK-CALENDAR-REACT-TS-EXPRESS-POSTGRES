@@ -58,6 +58,67 @@ router.post("/", async (req: AuthenticatedRequest, res: Response): Promise<void>
   }
 });
 
+router.post("/reorder", async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const { updates } = req.body as {
+      updates?: Array<{ id: string; date: string; position: number }>;
+    };
+
+    if (!Array.isArray(updates) || updates.length === 0) {
+      res.status(400).json({ error: "Updates are required" });
+      return;
+    }
+
+    const hasInvalidUpdate = updates.some(
+      (update) =>
+        !update?.id ||
+        !update?.date ||
+        typeof update.position !== "number" ||
+        !Number.isInteger(update.position) ||
+        update.position < 0
+    );
+
+    if (hasInvalidUpdate) {
+      res.status(400).json({ error: "Invalid reorder payload" });
+      return;
+    }
+
+    await pool.query("BEGIN");
+    try {
+      // Phase 1: move to temporary negative positions to avoid UNIQUE conflicts.
+      for (let index = 0; index < updates.length; index += 1) {
+        const update = updates[index];
+        await pool.query(
+          `UPDATE tasks
+           SET date = $1, position = $2, updated_at = CURRENT_TIMESTAMP
+           WHERE id = $3 AND user_id = $4`,
+          [update.date, -(index + 1), update.id, req.user!.id]
+        );
+      }
+
+      // Phase 2: set the final target positions.
+      for (const update of updates) {
+        await pool.query(
+          `UPDATE tasks
+           SET date = $1, position = $2, updated_at = CURRENT_TIMESTAMP
+           WHERE id = $3 AND user_id = $4`,
+          [update.date, update.position, update.id, req.user!.id]
+        );
+      }
+
+      await pool.query("COMMIT");
+    } catch (error) {
+      await pool.query("ROLLBACK");
+      throw error;
+    }
+
+    res.json({ message: "Tasks reordered successfully" });
+  } catch (error) {
+    console.error("Reorder tasks error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 router.put("/:id", async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
