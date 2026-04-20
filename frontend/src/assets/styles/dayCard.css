@@ -241,7 +241,7 @@
 .checkbox-fake {
     width: 20px;
     height: 20px;
-    border: 2px solid transparent;
+    border: 2px solid #e2e2e2; /* Светлая граница по умолчанию */
     border-radius: 50%;
     display: flex;
     justify-content: center;
@@ -257,16 +257,32 @@
     stroke: black;
     stroke-width: 3;
     fill: none;
-    opacity: 0;
+    opacity: 0.15; /* Едва заметная галочка по умолчанию */
     transition: opacity 0.2s ease-in-out;
 }
 
-.task-row:hover .checkbox-fake {
-    border-color: black;
+@media (hover: hover) {
+    .checkbox-fake {
+        border-color: transparent;
+    }
+    .checkbox-icon {
+        opacity: 0;
+    }
+    .task-row:hover .checkbox-fake {
+        border-color: black;
+    }
+    .task-row:hover .checkbox-icon {
+        opacity: 1;
+    }
 }
 
-.task-row:hover .checkbox-icon {
-    opacity: 1;
+@media (hover: none) {
+    .checkbox-fake {
+        border-color: #ccc;
+    }
+    .checkbox-icon {
+        opacity: 0.3;
+    }
 }
 
 .checkbox-real:checked + .checkbox-fake {
