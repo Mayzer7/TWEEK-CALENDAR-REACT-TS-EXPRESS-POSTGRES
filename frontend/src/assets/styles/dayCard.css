@@ -326,14 +326,14 @@
     }
 }
 
-@media (max-width: 500px) {
+/* @media (max-width: 500px) {
     .data-number, .data-day {
         font-size: 18px;
     }
-}
+} */
 
 @media (max-width: 400px) {
-    .data-number, .data-day {
+    /* .data-number, .data-day {
         font-size: 16px;
     }
 
@@ -345,7 +345,7 @@
         font-size: 13px;
         padding: 0px;
         padding-bottom: 2px;
-    }
+    } */
 
     .day-cards {
         margin-top: 0px;

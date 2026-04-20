@@ -127,7 +127,7 @@ function DayCard({ cardId, date, dateStr, tasks, highlightedTaskId, onUpdateTask
 
   const savedTasks = tasks || [];
   const filledCount = savedTasks.filter(t => t.text.trim()).length;
-  const emptyInputsCount = Math.max(1, BASE_COUNT - filledCount);
+  const emptyInputsCount = BASE_COUNT;
 
   useEffect(() => {
     if (!activeTask) return;
@@ -186,13 +186,8 @@ function DayCard({ cardId, date, dateStr, tasks, highlightedTaskId, onUpdateTask
     const text = e.target.value.trim();
     const relatedTarget = e.relatedTarget as HTMLElement;
     
-    if (relatedTarget && e.target.closest('.day-card-body')?.contains(relatedTarget)) {
-      e.target.closest('.task-row')?.classList.remove('input-focused');
-      return;
-    }
-    
     if (text) {
-      onAddTask(dateStr, text);
+      setTimeout(() => onAddTask(dateStr, text), 0);
       e.target.value = "";
     }
     e.target.closest('.task-row')?.classList.remove('input-focused');
@@ -207,7 +202,7 @@ function DayCard({ cardId, date, dateStr, tasks, highlightedTaskId, onUpdateTask
       const input = e.currentTarget;
       const text = input.value.trim();
       if (text) {
-        onAddTask(dateStr, text);
+        setTimeout(() => onAddTask(dateStr, text), 0);
         input.value = "";
       }
       input.blur();
@@ -215,7 +210,7 @@ function DayCard({ cardId, date, dateStr, tasks, highlightedTaskId, onUpdateTask
   }, [onAddTask, dateStr]);
 
   const emptyInputs = useMemo(() => Array.from({ length: emptyInputsCount }, (_, i) => (
-    <div key={`empty-${i}`} className="task-row empty-task">
+    <div key={`empty-${filledCount + i}`} className="task-row empty-task">
       <input
         ref={i === 0 ? inputRef : undefined}
         className="task-input"
@@ -226,7 +221,7 @@ function DayCard({ cardId, date, dateStr, tasks, highlightedTaskId, onUpdateTask
         onKeyDown={handleInputKeyDown}
       />
     </div>
-  )), [emptyInputsCount, handleInputBlur, handleInputFocus, handleInputKeyDown]);
+  )), [emptyInputsCount, filledCount, handleInputBlur, handleInputFocus, handleInputKeyDown]);
 
   return (
     <div className={`day-card ${isToday ? "today-highlight" : ""}`} data-date={dateStr}>

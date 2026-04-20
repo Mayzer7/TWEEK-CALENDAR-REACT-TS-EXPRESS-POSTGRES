@@ -7,11 +7,14 @@
     top: 0;
     left: 0;
     width: 100%;
-    background: white;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     z-index: 1000;
-    padding-top: 24px;
+    padding-top: max(24px, env(safe-area-inset-top));
     padding-bottom: 14px;
     box-sizing: border-box;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .header-content {
@@ -113,7 +116,7 @@
 
 @media (max-width: 400px) {
     .header-data {
-        font-size: 20px;
+        font-size: 22px;
     }
 
     .header-right-side button,

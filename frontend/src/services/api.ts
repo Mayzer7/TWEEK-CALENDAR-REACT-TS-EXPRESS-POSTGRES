@@ -1,5 +1,5 @@
 const API_URL =
-  (import.meta as any).env?.VITE_API_URL?.toString() || "http://localhost:3001/api";
+  (import.meta as any).env?.VITE_API_URL?.toString() || `http://${window.location.hostname}:3001/api`;
 
 interface User {
   id: string;
