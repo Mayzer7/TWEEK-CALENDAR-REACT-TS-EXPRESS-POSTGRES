@@ -29,6 +29,7 @@ body {
     place-items: unset;
     text-align: unset;   
     display: block;
+    min-width: 340px;
 }
 
 html {  
@@ -119,3 +120,19 @@ button {
     scrollbar-width: thin; 
   }
 }
+
+
+
+/* Адаптив */
+
+@media (max-width: 600px) {
+    .container {
+      padding: 0px 12px 12px 24px;
+    }
+}
+
+@media (max-width: 450px) {
+    .container {
+      padding: 0px 0px 8px 8px;
+    }
+}   

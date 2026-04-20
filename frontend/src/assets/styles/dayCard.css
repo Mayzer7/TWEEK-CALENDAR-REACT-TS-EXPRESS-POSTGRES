@@ -288,39 +288,66 @@
   transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
+/* Адаптив */
 
-@media (max-width: 1500px) {
+@media (max-width: 1700px) {
     .day-cards {
         grid-template-columns: repeat(5, 1fr);
     }
 }
 
-@media (max-width: 1230px) {
+@media (max-width: 1500px) {
     .day-cards {
         grid-template-columns: repeat(4, 1fr);
     }
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 1250px) {
     .day-cards {
         grid-template-columns: repeat(3, 1fr);
     }
 }
 
-@media (max-width: 800px) {
+@media (max-width: 950px) {
     .day-cards {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
-@media (max-width: 600px) {
-    .header-data {
-        font-size: 30px;
+@media (max-width: 650px) {
+    .day-cards {
+        grid-template-columns: repeat(1, 1fr);
     }
 }
 
-@media (max-width: 510px) {
+@media (max-width: 600px) {
     .day-cards {
-        grid-template-columns: repeat(1, 1fr);
+        margin-top: 10px;
+    }
+}
+
+@media (max-width: 500px) {
+    .data-number, .data-day {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 400px) {
+    .data-number, .data-day {
+        font-size: 16px;
+    }
+
+    .task-row {
+        padding: 6px 0;
+    }
+
+    .task-input {
+        font-size: 13px;
+        padding: 0px;
+        padding-bottom: 2px;
+    }
+
+    .day-cards {
+        margin-top: 0px;
     }
 }

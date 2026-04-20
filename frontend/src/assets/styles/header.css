@@ -68,3 +68,77 @@
     width: 10px;  
     height: auto;
 }
+
+/* Адаптив */
+
+@media (max-width: 600px) {
+    .header-data {
+        font-size: 30px;
+    }
+
+    .header-right-side button,
+    .search-btn svg,
+    .profile img  {
+        width: 36px !important;
+        height: 36px !important;
+    }
+}
+
+@media (max-width: 500px) {
+    .header-data {
+        font-size: 24px;
+    }
+
+    .header-right-side button,
+    .search-btn svg,
+    .profile img  {
+        width: 32px !important;
+        height: 32px !important;
+    }
+
+    .navigation-buttons button svg {
+        width: 8px;  
+        height: auto;
+    }
+
+    .header-right-side,
+    .navigation-buttons {
+        gap: 8px;
+    }
+
+    .search-btn {
+        margin-right: 8px;
+    }
+}
+
+@media (max-width: 400px) {
+    .header-data {
+        font-size: 20px;
+    }
+
+    .header-right-side button,
+    .search-btn svg,
+    .profile img  {
+        width: 28px !important;
+        height: 28px !important;
+    }
+
+    .navigation-buttons button svg {
+        width: 7px;  
+        height: auto;
+    }
+
+    .header-right-side,
+    .navigation-buttons {
+        gap: 6px;
+    }
+
+    .search-btn {
+        margin-right: 6px;
+    }
+
+    .header {
+        padding-top: 14px;
+        padding-bottom: 10px;
+    }
+}
