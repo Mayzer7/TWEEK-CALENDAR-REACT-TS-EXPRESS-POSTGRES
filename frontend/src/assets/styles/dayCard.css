@@ -130,30 +130,32 @@
 
 .month-edge-drop-prev {
     left: 0;
-    background: linear-gradient(90deg, rgba(81, 103, 244, 0.13) 0%, rgba(81, 103, 244, 0) 100%);
 }
 
 .month-edge-drop-next {
     right: 0;
-    background: linear-gradient(270deg, rgba(81, 103, 244, 0.13) 0%, rgba(81, 103, 244, 0) 100%);
 }
 
 .month-edge-drop-indicator {
-    width: 34px;
-    height: 34px;
-    border-radius: 999px;
-    background: rgba(81, 103, 244, 0.15);
-    color: #2d3fa5;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #ffffff;
+    color: #5167f4;
     display: flex;
     align-items: center;
     justify-content: center;
-    transform: scale(0.92);
-    transition: transform 0.18s ease, background-color 0.18s ease;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(81, 103, 244, 0.1);
+    transform: scale(0.9);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .month-edge-drop.hovered .month-edge-drop-indicator {
-    transform: scale(1);
-    background: rgba(81, 103, 244, 0.24);
+    transform: scale(1.15);
+    background: #5167f4;
+    color: white;
+    box-shadow: 0 12px 32px rgba(81, 103, 244, 0.4);
 }
 
 .task-highlighted {
