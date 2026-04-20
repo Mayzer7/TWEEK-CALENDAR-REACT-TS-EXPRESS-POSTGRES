@@ -326,7 +326,6 @@ export default function App() {
     const token = storage.getToken();
     if (!token) return;
 
-    console.log("App setTaskCompleted:", { dateStr, taskId, completed });
     api.updateTask(token, taskId, { completed }).catch(console.error);
 
     setTasksByDate(prev => {

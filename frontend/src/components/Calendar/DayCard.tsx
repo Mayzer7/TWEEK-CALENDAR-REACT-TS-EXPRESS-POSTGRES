@@ -127,7 +127,7 @@ function DayCard({ cardId, date, dateStr, tasks, highlightedTaskId, onUpdateTask
 
   const savedTasks = tasks || [];
   const filledCount = savedTasks.filter(t => t.text.trim()).length;
-  const emptyInputsCount = BASE_COUNT;
+  const emptyInputsCount = Math.max(1, BASE_COUNT - savedTasks.length);
 
   useEffect(() => {
     if (!activeTask) return;
