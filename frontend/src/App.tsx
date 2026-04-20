@@ -159,6 +159,7 @@ export default function App() {
   const edgeHoverDirectionRef = useRef<MonthEdgeDirection | null>(null);
   const currentMonthRef = useRef(nowMoscow.getMonth());
   const currentYearRef = useRef(nowMoscow.getFullYear());
+  const [lastAddedTaskId, setLastAddedTaskId] = useState<string | null>(null);
   const latestFetchRequestIdRef = useRef(0);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -325,6 +326,7 @@ export default function App() {
           ...prev,
           [dateStr]: [...(prev[dateStr] || []), newTask],
         }));
+        setLastAddedTaskId(newTask.id);
       })
       .catch(console.error);
   }, []);
@@ -728,25 +730,36 @@ export default function App() {
                   highlighted={edgeHoverDirection === "next"}
                 />
                 <div className="day-cards">
-                  {dates.map((date, i) => {
-                    const dateStr = formatDateStr(date);
-                    const dayTasks = tasksByDate[dateStr] || [];
+                  {(() => {
+                    const maxTasksPerDay = dates.reduce((max, date) => {
+                      const dateStr = formatDateStr(date);
+                      const count = (tasksByDate[dateStr] || []).length;
+                      return Math.max(max, count);
+                    }, 0);
+                    const minRows = Math.max(7, maxTasksPerDay + 1);
 
-                    return (
-                      <DayCard
-                        key={dateStr}
-                        cardId={i + 1}
-                        date={date}
-                        dateStr={dateStr}
-                        tasks={dayTasks}
-                        highlightedTaskId={highlightedTaskId}
-                        onUpdateTask={updateTaskText}
-                        onSetTaskCompleted={setTaskCompleted}
-                        onAddTask={addTask}
-                        onDeleteTask={deleteTask}
-                      />
-                    );
-                  })}
+                    return dates.map((date, i) => {
+                      const dateStr = formatDateStr(date);
+                      const dayTasks = tasksByDate[dateStr] || [];
+
+                      return (
+                        <DayCard
+                          key={dateStr}
+                          cardId={i + 1}
+                          date={date}
+                          dateStr={dateStr}
+                          tasks={dayTasks}
+                          minRows={minRows}
+                          lastAddedTaskId={lastAddedTaskId}
+                          highlightedTaskId={highlightedTaskId}
+                          onUpdateTask={updateTaskText}
+                          onSetTaskCompleted={setTaskCompleted}
+                          onAddTask={addTask}
+                          onDeleteTask={deleteTask}
+                        />
+                      );
+                    });
+                  })()}
                 </div>
 
                 <DragOverlay>

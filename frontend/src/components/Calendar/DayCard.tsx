@@ -19,6 +19,8 @@ interface DayCardProps {
   date: Date;
   dateStr: string;
   tasks: Task[];
+  minRows: number;
+  lastAddedTaskId?: string | null;
   highlightedTaskId?: string | null;
   onUpdateTask: (dateStr: string, taskId: string, text: string) => void;
   onSetTaskCompleted: (dateStr: string, taskId: string, completed: boolean) => void;
@@ -104,8 +106,7 @@ function SortableTaskRow({
   );
 }
 
-function DayCard({ cardId, date, dateStr, tasks, highlightedTaskId, onUpdateTask, onSetTaskCompleted, onAddTask, onDeleteTask }: DayCardProps) {
-  const BASE_COUNT = 7;
+function DayCard({ cardId, date, dateStr, tasks, minRows, lastAddedTaskId, highlightedTaskId, onUpdateTask, onSetTaskCompleted, onAddTask, onDeleteTask }: DayCardProps) {
   const nowMoscow = useMemo(() => new Date(
     new Date().toLocaleString("en-US", { timeZone: "Europe/Moscow" })
   ), []);
@@ -126,8 +127,18 @@ function DayCard({ cardId, date, dateStr, tasks, highlightedTaskId, onUpdateTask
   });
 
   const savedTasks = tasks || [];
-  const filledCount = savedTasks.filter(t => t.text.trim()).length;
-  const emptyInputsCount = Math.max(0, BASE_COUNT - filledCount);
+  const emptyInputsCount = Math.max(0, minRows - savedTasks.length);
+
+  useEffect(() => {
+    if (!lastAddedTaskId) return;
+    const taskExists = savedTasks.some(t => t.id === lastAddedTaskId);
+    if (taskExists) {
+      const element = document.querySelector(`[data-task-id="${lastAddedTaskId}"]`);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    }
+  }, [savedTasks, lastAddedTaskId]);
 
   useEffect(() => {
     if (!activeTask) return;
