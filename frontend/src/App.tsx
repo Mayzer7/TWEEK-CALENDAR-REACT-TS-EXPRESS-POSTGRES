@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import "/src/assets/styles/main.css";
 import { Routes, Route, Navigate } from "react-router-dom";
 import {
@@ -33,6 +33,9 @@ interface DayTasks {
 }
 
 type MonthEdgeDirection = "prev" | "next";
+const MONTH_FULL = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
+const MONTH_SHORT = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
+const MONTH_PATTERN = MONTH_FULL.concat(MONTH_SHORT).join("|");
 
 interface MonthEdgeDropZoneProps {
   id: string;
@@ -156,6 +159,7 @@ export default function App() {
   const edgeHoverDirectionRef = useRef<MonthEdgeDirection | null>(null);
   const currentMonthRef = useRef(nowMoscow.getMonth());
   const currentYearRef = useRef(nowMoscow.getFullYear());
+  const latestFetchRequestIdRef = useRef(0);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 120, tolerance: 8 } })
@@ -182,6 +186,7 @@ export default function App() {
 
     const startDate = new Date(currentYear, currentMonth, 1);
     const endDate = new Date(currentYear, currentMonth + 1, 0);
+    const requestId = ++latestFetchRequestIdRef.current;
 
     const formatDate = (d: Date) => {
       const year = d.getFullYear();
@@ -192,6 +197,9 @@ export default function App() {
 
     api.getTasks(token, formatDate(startDate), formatDate(endDate))
       .then((tasks: Task[]) => {
+        if (requestId !== latestFetchRequestIdRef.current) {
+          return;
+        }
         const grouped: DayTasks = {};
         tasks.forEach((task: Task) => {
           const taskDate = parseDateToString(task.date);
@@ -225,13 +233,14 @@ export default function App() {
     setIsAuthenticated(false);
     setUser(null);
     setTasksByDate({});
+    latestFetchRequestIdRef.current += 1;
   };
 
-  const changeMonth = (direction: number) => {
+  const changeMonth = useCallback((direction: number) => {
     const newDate = new Date(currentYearRef.current, currentMonthRef.current + direction, 1);
     setCurrentMonth(newDate.getMonth());
     setCurrentYear(newDate.getFullYear());
-  };
+  }, []);
 
   useEffect(() => {
     currentMonthRef.current = currentMonth;
@@ -252,12 +261,15 @@ export default function App() {
     setIsDragInProgress(false);
   }, [clearEdgeSwitchTimer]);
 
-  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const daysInMonth = useMemo(() => new Date(currentYear, currentMonth + 1, 0).getDate(), [currentYear, currentMonth]);
 
-  const dates: Date[] = [];
-  for (let i = 0; i < daysInMonth; i++) {
-    dates.push(new Date(currentYear, currentMonth, i + 1));
-  }
+  const dates = useMemo<Date[]>(() => {
+    const nextDates: Date[] = [];
+    for (let i = 0; i < daysInMonth; i++) {
+      nextDates.push(new Date(currentYear, currentMonth, i + 1));
+    }
+    return nextDates;
+  }, [currentYear, currentMonth, daysInMonth]);
 
   const formatDateStr = (date: Date) => formatDate(date);
 
@@ -332,11 +344,23 @@ export default function App() {
   const handleDragStart = useCallback((event: DragStartEvent) => {
     setIsDragInProgress(true);
     const activeId = String(event.active.id);
+
+    const activeData = event.active.data.current as { dateStr?: string } | undefined;
+    const sourceDate = activeData?.dateStr ? parseDateToString(activeData.dateStr) : null;
+    if (sourceDate) {
+      const sourceTasks = tasksByDate[sourceDate] || [];
+      const sourceTask = sourceTasks.find((item) => item.id === activeId);
+      if (sourceTask) {
+        setActiveDragTask({ ...sourceTask, date: sourceDate });
+        return;
+      }
+    }
+
     for (const [day, dayTasks] of Object.entries(tasksByDate)) {
       const task = dayTasks.find((item) => item.id === activeId);
       if (task) {
         setActiveDragTask({ ...task, date: day });
-        break;
+        return;
       }
     }
   }, [tasksByDate]);
@@ -526,10 +550,6 @@ export default function App() {
       fetchTasks();
     });
   }, [tasksByDate, activeDragTask, fetchTasks, resetDragEdgeState]);
-
-  const MONTH_FULL = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
-  const MONTH_SHORT = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
-  const MONTH_PATTERN = MONTH_FULL.concat(MONTH_SHORT).join("|");
 
   const handleSearch = useCallback(async (query: string) => {
     const normalizedQuery = query.toLowerCase().trim();
@@ -722,14 +742,10 @@ export default function App() {
                         dateStr={dateStr}
                         tasks={dayTasks}
                         highlightedTaskId={highlightedTaskId}
-                        onUpdateTask={(taskId, text) =>
-                          updateTaskText(dateStr, taskId, text)
-                        }
-                        onSetTaskCompleted={(taskId, completed) =>
-                          setTaskCompleted(dateStr, taskId, completed)
-                        }
-                        onAddTask={(text) => addTask(dateStr, text)}
-                        onDeleteTask={(taskId) => deleteTask(dateStr, taskId)}
+                        onUpdateTask={updateTaskText}
+                        onSetTaskCompleted={setTaskCompleted}
+                        onAddTask={addTask}
+                        onDeleteTask={deleteTask}
                       />
                     );
                   })}

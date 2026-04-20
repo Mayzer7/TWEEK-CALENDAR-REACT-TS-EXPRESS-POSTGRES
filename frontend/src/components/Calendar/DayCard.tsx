@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { memo, useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -20,10 +20,10 @@ interface DayCardProps {
   dateStr: string;
   tasks: Task[];
   highlightedTaskId?: string | null;
-  onUpdateTask: (taskId: string, text: string) => void;
-  onSetTaskCompleted: (taskId: string, completed: boolean) => void;
-  onAddTask: (text: string) => void;
-  onDeleteTask: (taskId: string) => void;
+  onUpdateTask: (dateStr: string, taskId: string, text: string) => void;
+  onSetTaskCompleted: (dateStr: string, taskId: string, completed: boolean) => void;
+  onAddTask: (dateStr: string, text: string) => void;
+  onDeleteTask: (dateStr: string, taskId: string) => void;
 }
 
 interface SortableTaskRowProps {
@@ -104,11 +104,11 @@ function SortableTaskRow({
   );
 }
 
-export default function DayCard({ cardId, date, dateStr, tasks, highlightedTaskId, onUpdateTask, onSetTaskCompleted, onAddTask, onDeleteTask }: DayCardProps) {
+function DayCard({ cardId, date, dateStr, tasks, highlightedTaskId, onUpdateTask, onSetTaskCompleted, onAddTask, onDeleteTask }: DayCardProps) {
   const BASE_COUNT = 7;
-  const nowMoscow = new Date(
+  const nowMoscow = useMemo(() => new Date(
     new Date().toLocaleString("en-US", { timeZone: "Europe/Moscow" })
-  );
+  ), []);
 
   const isToday =
     nowMoscow.getDate() === date.getDate() &&
@@ -141,48 +141,48 @@ export default function DayCard({ cardId, date, dateStr, tasks, highlightedTaskI
     }
   }, [savedTasks, activeTask]);
 
-  const handleTaskClick = (taskId: string) => {
+  const handleTaskClick = useCallback((taskId: string) => {
     const task = savedTasks.find(t => t.id === taskId);
     if (task && task.text.trim()) {
       setActiveTask(task);
     }
-  };
+  }, [savedTasks]);
 
-  const handleSavedTaskUpdate = (updated: Task) => {
+  const handleSavedTaskUpdate = useCallback((updated: Task) => {
     const existing = savedTasks.find((task) => task.id === updated.id);
     setActiveTask(updated);
 
     if (existing && !updated.id.startsWith("local-")) {
       if (existing.completed !== updated.completed) {
-        onSetTaskCompleted(updated.id, updated.completed);
+        onSetTaskCompleted(dateStr, updated.id, updated.completed);
       }
       if (existing.text !== updated.text) {
-        onUpdateTask(updated.id, updated.text);
+        onUpdateTask(dateStr, updated.id, updated.text);
       }
     }
-  };
+  }, [savedTasks, onSetTaskCompleted, dateStr, onUpdateTask]);
 
-  const handleSavedTaskDelete = (id: string) => {
-    onDeleteTask(id);
+  const handleSavedTaskDelete = useCallback((id: string) => {
+    onDeleteTask(dateStr, id);
     setActiveTask(null);
-  };
+  }, [onDeleteTask, dateStr]);
 
-  const handleModalClose = () => {
+  const handleModalClose = useCallback(() => {
     setActiveTask(null);
-  };
+  }, []);
 
-  const toggleTaskCompleted = (task: Task, e: React.MouseEvent) => {
+  const toggleTaskCompleted = useCallback((task: Task, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!task.id.startsWith("local-")) {
       const updated = { ...task, completed: !task.completed };
       if (activeTask?.id === task.id) {
         setActiveTask(updated);
       }
-      onSetTaskCompleted(task.id, updated.completed);
+      onSetTaskCompleted(dateStr, task.id, updated.completed);
     }
-  };
+  }, [activeTask, onSetTaskCompleted, dateStr]);
 
-  const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+  const handleInputBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
     const text = e.target.value.trim();
     const relatedTarget = e.relatedTarget as HTMLElement;
     
@@ -192,29 +192,29 @@ export default function DayCard({ cardId, date, dateStr, tasks, highlightedTaskI
     }
     
     if (text) {
-      onAddTask(text);
+      onAddTask(dateStr, text);
       e.target.value = "";
     }
     e.target.closest('.task-row')?.classList.remove('input-focused');
-  };
+  }, [onAddTask, dateStr]);
 
-  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+  const handleInputFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
     e.target.closest('.task-row')?.classList.add('input-focused');
-  };
+  }, []);
 
-  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleInputKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       const input = e.currentTarget;
       const text = input.value.trim();
       if (text) {
-        onAddTask(text);
+        onAddTask(dateStr, text);
         input.value = "";
       }
       input.blur();
     }
-  };
+  }, [onAddTask, dateStr]);
 
-  const emptyInputs = Array.from({ length: emptyInputsCount }, (_, i) => (
+  const emptyInputs = useMemo(() => Array.from({ length: emptyInputsCount }, (_, i) => (
     <div key={`empty-${i}`} className="task-row empty-task">
       <input
         ref={i === 0 ? inputRef : undefined}
@@ -226,7 +226,7 @@ export default function DayCard({ cardId, date, dateStr, tasks, highlightedTaskI
         onKeyDown={handleInputKeyDown}
       />
     </div>
-  ));
+  )), [emptyInputsCount, handleInputBlur, handleInputFocus, handleInputKeyDown]);
 
   return (
     <div className={`day-card ${isToday ? "today-highlight" : ""}`} data-date={dateStr}>
@@ -268,3 +268,5 @@ export default function DayCard({ cardId, date, dateStr, tasks, highlightedTaskI
     </div>
   );
 }
+
+export default memo(DayCard);
