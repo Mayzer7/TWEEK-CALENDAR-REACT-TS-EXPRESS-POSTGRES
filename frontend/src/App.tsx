@@ -169,6 +169,22 @@ export default function App() {
   const currentMonthRef = useRef(nowMoscow.getMonth());
   const currentYearRef = useRef(nowMoscow.getFullYear());
   const latestFetchRequestIdRef = useRef(0);
+
+  useEffect(() => {
+    if (!activeDragTask) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTop += e.deltaY;
+      }
+    };
+
+    window.addEventListener("wheel", handleWheel, { passive: true });
+    return () => {
+      window.removeEventListener("wheel", handleWheel);
+    };
+  }, [activeDragTask]);
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 120, tolerance: 8 } })
@@ -733,6 +749,7 @@ export default function App() {
               <DndContext
                 sensors={sensors}
                 collisionDetection={collisionDetection}
+                autoScroll={{ threshold: { x: 0, y: 0.1 } }}
                 onDragStart={handleDragStart}
                 onDragOver={handleDragOver}
                 onDragCancel={handleDragCancel}
