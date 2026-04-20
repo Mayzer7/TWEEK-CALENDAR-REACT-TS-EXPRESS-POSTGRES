@@ -90,7 +90,7 @@ export default function App() {
   const MONTH_EDGE_PREV_ID = "month-edge-prev";
   const MONTH_EDGE_NEXT_ID = "month-edge-next";
   const AUTO_MONTH_SWITCH_DELAY_MS = 650;
-  const AUTO_MONTH_SWITCH_REPEAT_MS = 3000;
+  const AUTO_MONTH_SWITCH_REPEAT_MS = 1000;
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(storage.getUser());
