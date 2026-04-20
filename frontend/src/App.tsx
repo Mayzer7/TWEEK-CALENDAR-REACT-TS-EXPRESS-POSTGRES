@@ -90,7 +90,7 @@ export default function App() {
   const MONTH_EDGE_PREV_ID = "month-edge-prev";
   const MONTH_EDGE_NEXT_ID = "month-edge-next";
   const AUTO_MONTH_SWITCH_DELAY_MS = 650;
-  const AUTO_MONTH_SWITCH_COOLDOWN_MS = 450;
+  const AUTO_MONTH_SWITCH_REPEAT_MS = 3000;
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(storage.getUser());
@@ -155,7 +155,7 @@ export default function App() {
   const [edgeHoverDirection, setEdgeHoverDirection] = useState<MonthEdgeDirection | null>(null);
   const [isDragInProgress, setIsDragInProgress] = useState(false);
   const edgeSwitchTimeoutRef = useRef<number | null>(null);
-  const edgeSwitchCooldownRef = useRef<number>(0);
+  const edgeSwitchIntervalRef = useRef<number | null>(null);
   const edgeHoverDirectionRef = useRef<MonthEdgeDirection | null>(null);
   const currentMonthRef = useRef(nowMoscow.getMonth());
   const currentYearRef = useRef(nowMoscow.getFullYear());
@@ -251,6 +251,10 @@ export default function App() {
     if (edgeSwitchTimeoutRef.current) {
       window.clearTimeout(edgeSwitchTimeoutRef.current);
       edgeSwitchTimeoutRef.current = null;
+    }
+    if (edgeSwitchIntervalRef.current) {
+      window.clearInterval(edgeSwitchIntervalRef.current);
+      edgeSwitchIntervalRef.current = null;
     }
   }, []);
 
@@ -382,37 +386,31 @@ export default function App() {
       return;
     }
 
-    edgeHoverDirectionRef.current = nextEdgeDirection;
     setEdgeHoverDirection(nextEdgeDirection);
 
-    const now = Date.now();
-    if (edgeSwitchTimeoutRef.current) {
+    const isAlreadyRunningForDirection =
+      edgeHoverDirectionRef.current === nextEdgeDirection &&
+      (edgeSwitchTimeoutRef.current !== null || edgeSwitchIntervalRef.current !== null);
+    if (isAlreadyRunningForDirection) {
       return;
     }
 
-    const scheduleSwitch = (delayMs: number) => {
-      edgeSwitchTimeoutRef.current = window.setTimeout(() => {
-        edgeSwitchTimeoutRef.current = null;
+    clearEdgeSwitchTimer();
+    edgeHoverDirectionRef.current = nextEdgeDirection;
+
+    const moveDirection = nextEdgeDirection === "prev" ? -1 : 1;
+    edgeSwitchTimeoutRef.current = window.setTimeout(() => {
+      edgeSwitchTimeoutRef.current = null;
+      if (edgeHoverDirectionRef.current !== nextEdgeDirection) return;
+
+      changeMonth(moveDirection);
+
+      edgeSwitchIntervalRef.current = window.setInterval(() => {
         if (edgeHoverDirectionRef.current !== nextEdgeDirection) return;
-
-        const nowInsideTimeout = Date.now();
-        const cooldownRemaining = edgeSwitchCooldownRef.current - nowInsideTimeout;
-        if (cooldownRemaining > 0) {
-          scheduleSwitch(cooldownRemaining);
-          return;
-        }
-
-        edgeSwitchCooldownRef.current = Date.now() + AUTO_MONTH_SWITCH_COOLDOWN_MS;
-        changeMonth(nextEdgeDirection === "prev" ? -1 : 1);
-      }, Math.max(0, delayMs));
-    };
-
-    const cooldownRemaining = edgeSwitchCooldownRef.current - now;
-    const initialDelay = cooldownRemaining > 0
-      ? cooldownRemaining + AUTO_MONTH_SWITCH_DELAY_MS
-      : AUTO_MONTH_SWITCH_DELAY_MS;
-    scheduleSwitch(initialDelay);
-  }, [AUTO_MONTH_SWITCH_COOLDOWN_MS, AUTO_MONTH_SWITCH_DELAY_MS, MONTH_EDGE_NEXT_ID, MONTH_EDGE_PREV_ID, changeMonth, clearEdgeSwitchTimer]);
+        changeMonth(moveDirection);
+      }, AUTO_MONTH_SWITCH_REPEAT_MS);
+    }, AUTO_MONTH_SWITCH_DELAY_MS);
+  }, [AUTO_MONTH_SWITCH_DELAY_MS, AUTO_MONTH_SWITCH_REPEAT_MS, MONTH_EDGE_NEXT_ID, MONTH_EDGE_PREV_ID, changeMonth, clearEdgeSwitchTimer]);
 
   const handleDragCancel = useCallback((_event: DragCancelEvent) => {
     setActiveDragTask(null);
