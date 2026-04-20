@@ -8,6 +8,7 @@
 }
 
 .profile-content {
+  min-width: 340px;
   position: fixed;
   top: 50%;
   left: 50%;

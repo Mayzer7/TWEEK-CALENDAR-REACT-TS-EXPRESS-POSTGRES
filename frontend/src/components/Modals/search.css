@@ -8,6 +8,7 @@
 }
 
 .search-content {
+  min-width: 340px;
   position: fixed;
   top: 80px;
   left: 50%;
@@ -86,5 +87,20 @@
   to {
     opacity: 1;
     transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+
+/* Адаптив */
+
+@media (max-width: 600px) {
+  .search-input {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 500px) {
+  .search-input {
+    font-size: 15px;
   }
 }
