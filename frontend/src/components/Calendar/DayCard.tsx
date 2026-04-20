@@ -1,4 +1,4 @@
-import React, { memo, useState, useRef, useEffect, useCallback, useMemo } from "react";
+import React, { memo, useState, useRef, useCallback, useMemo } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -115,7 +115,7 @@ function DayCard({ cardId, date, dateStr, tasks, highlightedTaskId, onUpdateTask
     nowMoscow.getMonth() === date.getMonth() &&
     nowMoscow.getFullYear() === date.getFullYear();
 
-  const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { setNodeRef: setDroppableRef, isOver } = useDroppable({
     id: `day-${dateStr}`,
@@ -125,32 +125,23 @@ function DayCard({ cardId, date, dateStr, tasks, highlightedTaskId, onUpdateTask
     },
   });
 
-  const savedTasks = tasks || [];
-  const filledCount = savedTasks.filter(t => t.text.trim()).length;
-  const emptyInputsCount = Math.max(1, BASE_COUNT - savedTasks.length);
+  const savedTasks = useMemo(() => tasks || [], [tasks]);
+  const filledCount = useMemo(() => savedTasks.filter(t => t.text.trim()).length, [savedTasks]);
+  const emptyInputsCount = useMemo(() => Math.max(1, BASE_COUNT - savedTasks.length), [BASE_COUNT, savedTasks.length]);
 
-  useEffect(() => {
-    if (!activeTask) return;
-    const actualTask = savedTasks.find((task) => task.id === activeTask.id);
-    if (!actualTask) {
-      setActiveTask(null);
-      return;
-    }
-    if (actualTask.text !== activeTask.text || actualTask.completed !== activeTask.completed) {
-      setActiveTask(actualTask);
-    }
-  }, [savedTasks, activeTask]);
+  const activeTask = useMemo(() => 
+    activeTaskId ? savedTasks.find(t => t.id === activeTaskId) || null : null
+  , [activeTaskId, savedTasks]);
 
   const handleTaskClick = useCallback((taskId: string) => {
     const task = savedTasks.find(t => t.id === taskId);
     if (task && task.text.trim()) {
-      setActiveTask(task);
+      setActiveTaskId(task.id);
     }
   }, [savedTasks]);
 
   const handleSavedTaskUpdate = useCallback((updated: Task) => {
     const existing = savedTasks.find((task) => task.id === updated.id);
-    setActiveTask(updated);
 
     if (existing && !updated.id.startsWith("local-")) {
       if (existing.completed !== updated.completed) {
@@ -164,27 +155,23 @@ function DayCard({ cardId, date, dateStr, tasks, highlightedTaskId, onUpdateTask
 
   const handleSavedTaskDelete = useCallback((id: string) => {
     onDeleteTask(dateStr, id);
-    setActiveTask(null);
+    setActiveTaskId(null);
   }, [onDeleteTask, dateStr]);
 
   const handleModalClose = useCallback(() => {
-    setActiveTask(null);
+    setActiveTaskId(null);
   }, []);
 
   const toggleTaskCompleted = useCallback((task: Task, e: React.MouseEvent) => {
+    (e.currentTarget as HTMLElement).closest('.checkbox-wrapper')?.classList.add('checkbox-clicked');
     e.stopPropagation();
     if (!task.id.startsWith("local-")) {
-      const updated = { ...task, completed: !task.completed };
-      if (activeTask?.id === task.id) {
-        setActiveTask(updated);
-      }
-      onSetTaskCompleted(dateStr, task.id, updated.completed);
+      onSetTaskCompleted(dateStr, task.id, !task.completed);
     }
-  }, [activeTask, onSetTaskCompleted, dateStr]);
+  }, [onSetTaskCompleted, dateStr]);
 
   const handleInputBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
     const text = e.target.value.trim();
-    const relatedTarget = e.relatedTarget as HTMLElement;
     
     if (text) {
       setTimeout(() => onAddTask(dateStr, text), 0);

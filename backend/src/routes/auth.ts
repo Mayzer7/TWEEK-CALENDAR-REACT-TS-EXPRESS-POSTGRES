@@ -45,7 +45,7 @@ router.post("/register", async (req: Request, res: Response): Promise<void> => {
 
     const token = jwt.sign(
       { id: user.id, username: user.username, email: user.email },
-      process.env.JWT_SECRET || "your-super-secret-jwt-key-change-in-production",
+      process.env.JWT_SECRET!,
       { expiresIn: "7d" }
     );
 
@@ -95,7 +95,7 @@ router.post("/login", async (req: Request, res: Response): Promise<void> => {
 
     const token = jwt.sign(
       { id: user.id, username: user.username, email: user.email },
-      process.env.JWT_SECRET || "your-super-secret-jwt-key-change-in-production",
+      process.env.JWT_SECRET!,
       { expiresIn: "7d" }
     );
 
@@ -127,7 +127,7 @@ router.get("/me", async (req: Request, res: Response): Promise<void> => {
   try {
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET || "your-super-secret-jwt-key-change-in-production"
+      process.env.JWT_SECRET!
     ) as { id: string; email?: string; username?: string };
 
     const result = await pool.query(
@@ -295,7 +295,7 @@ router.patch("/me/avatar", async (req: Request, res: Response): Promise<void> =>
   try {
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET || "your-super-secret-jwt-key-change-in-production"
+      process.env.JWT_SECRET!
     ) as { id: string };
 
     const { avatar } = req.body;

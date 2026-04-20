@@ -28,7 +28,7 @@ export const authMiddleware = (
   try {
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET || "your-super-secret-jwt-key-change-in-production"
+      process.env.JWT_SECRET!
     ) as AuthPayload;
     req.user = decoded;
     next();

@@ -15,7 +15,6 @@ import {
   type DragStartEvent,
   type DragOverEvent,
   type DragEndEvent,
-  type DragCancelEvent,
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 
@@ -450,7 +449,7 @@ export default function App() {
     }, AUTO_MONTH_SWITCH_DELAY_MS);
   }, [AUTO_MONTH_SWITCH_DELAY_MS, AUTO_MONTH_SWITCH_REPEAT_MS, MONTH_EDGE_NEXT_ID, MONTH_EDGE_PREV_ID, changeMonth, clearEdgeSwitchTimer]);
 
-  const handleDragCancel = useCallback((_event: DragCancelEvent) => {
+  const handleDragCancel = useCallback(() => {
     setActiveDragTask(null);
     resetDragEdgeState();
   }, [resetDragEdgeState]);
