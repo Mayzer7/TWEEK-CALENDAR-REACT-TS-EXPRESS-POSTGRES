@@ -1,0 +1,11 @@
+{
+  "name": "copy-tweek-calendar",
+  "version": "1.0.0",
+  "description": "Tweek Calendar Clone",
+  "scripts": {
+    "backup": "powershell -ExecutionPolicy Bypass -File ./db-backup.ps1",
+    "restore": "powershell -ExecutionPolicy Bypass -File ./db-restore.ps1",
+    "dev": "docker compose up",
+    "stop": "docker compose down"
+  }
+}
