@@ -32,18 +32,15 @@ body {
     min-width: 340px;
 }
 
-html {  
+html,
+body {
   box-sizing: border-box;
-  overflow-x: hidden;
-  height: 100%;
-  overflow-anchor: none;
-}
-body,
-html {
   margin: 0;
   padding: 0;
   height: 100%;
+  width: 100%;
   overflow: hidden;
+  overscroll-behavior: none;
   overflow-anchor: none;
 }
 
