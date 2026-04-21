@@ -8,6 +8,7 @@
 }
 
 .search-content {
+  min-width: 340px;
   position: fixed;
   top: 80px;
   left: 50%;
@@ -51,6 +52,7 @@
   font-family: "SuisseIntl Regular", sans-serif;
   background: transparent;
   color: #1c1c1c;
+  min-width: 0;
 }
 
 .search-input::placeholder {
@@ -168,6 +170,17 @@
   }
 }
 
+@keyframes searchAppearMobile {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 /* Scrollbar styling */
 .search-results-container::-webkit-scrollbar {
   width: 6px;
@@ -189,14 +202,88 @@
 /* Responsive */
 @media (max-width: 600px) {
   .search-content {
-    top: 0;
-    width: 100vw;
-    height: 100vh;
-    max-height: 100vh;
-    border-radius: 0;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    width: auto;
+    height: auto;
+    max-height: none;
+    transform: none;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    animation: searchAppearMobile 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  .search-header {
+    padding: 12px 12px 12px 16px;
+  }
+
+  .search-form {
+    gap: 10px;
   }
   
   .search-input {
     font-size: 16px;
+  }
+
+  .search-close {
+    width: 34px;
+    height: 34px;
+    background: #f0f0f0;
+    border-radius: 50%;
+  }
+
+  .search-result-item {
+    padding: 14px 16px;
+  }
+
+  .search-result-text {
+    font-size: 14px;
+  }
+
+  .search-result-date {
+    font-size: 12px;
+    padding: 1px 6px;
+  }
+}
+
+/* Landscape or very short screens */
+@media (max-height: 500px) {
+  .search-content {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: 0;
+  }
+}
+
+/* Very narrow screens */
+@media (max-width: 350px) {
+  .search-content {
+    left: 8px;
+    right: 8px;
+    top: 8px;
+    bottom: 8px;
+    border-radius: 16px;
+  }
+  
+  .search-header {
+    padding: 10px 8px 10px 12px;
+  }
+
+  .search-form {
+    gap: 8px;
+  }
+
+  .search-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .search-close {
+    width: 30px;
+    height: 30px;
   }
 }
