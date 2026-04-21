@@ -586,6 +586,36 @@ export default function App() {
     });
   }, [tasksByDate, activeDragTask, fetchTasks, resetDragEdgeState]);
 
+  const navigateToTask = useCallback((taskId: string, date: string) => {
+    const [year, month, day] = date.split('-').map(Number);
+    const targetYear = year;
+    const targetMonth = month - 1;
+    const targetDay = day;
+
+    if (targetYear !== currentYear || targetMonth !== currentMonth) {
+      setCurrentYear(targetYear);
+      setCurrentMonth(targetMonth);
+    }
+
+    setHighlightedTaskId(taskId);
+
+    setTimeout(() => {
+      const taskRow = document.querySelector(`[data-task-id="${taskId}"]`);
+      const dayCard = document.querySelector(`[data-date="${date}"]`);
+      const container = scrollContainerRef.current;
+      
+      if (container) {
+        const targetElement = taskRow || dayCard;
+        if (targetElement) {
+          container.scrollTo({
+            top: targetElement.getBoundingClientRect().top + container.scrollTop - 120,
+            behavior: 'smooth'
+          });
+        }
+      }
+    }, 150);
+  }, [currentMonth, currentYear]);
+
   const handleSearch = useCallback(async (query: string) => {
     const normalizedQuery = query.toLowerCase().trim();
     const token = storage.getToken();
@@ -618,63 +648,20 @@ export default function App() {
         targetDay = parseInt(dayMatch[1]);
       }
       
-      if (targetMonth >= 0 && targetMonth <= 11) {
-        const container = scrollContainerRef.current;
-        if (container) {
-          const targetDateStr = `${targetYear}-${String(targetMonth + 1).padStart(2, '0')}-${String(targetDay).padStart(2, '0')}`;
-          
-          if (targetYear !== currentYear || targetMonth !== currentMonth) {
-            setCurrentYear(targetYear);
-            setCurrentMonth(targetMonth);
-          }
-          
-          setTimeout(() => {
-            const dayCard = document.querySelector(`[data-date="${targetDateStr}"]`);
-            if (dayCard && container) {
-              container.scrollTo({
-                top: dayCard.getBoundingClientRect().top + container.scrollTop - 80,
-                behavior: 'smooth'
-              });
-            }
-          }, 100);
-          return;
-        }
-      }
+      const targetDateStr = `${targetYear}-${String(targetMonth + 1).padStart(2, '0')}-${String(targetDay).padStart(2, '0')}`;
+      navigateToTask("", targetDateStr);
+      return;
     }
     
     try {
       const searchResults = await api.searchTasks(token, normalizedQuery);
-      
       if (searchResults.length > 0) {
-        const firstResult = searchResults[0];
-        const resultDate = firstResult.date;
-        
-        const [year, month] = resultDate.split('-');
-        const targetYear = parseInt(year);
-        const targetMonth = parseInt(month) - 1;
-        
-        if (targetYear !== currentYear || targetMonth !== currentMonth) {
-          setCurrentYear(targetYear);
-          setCurrentMonth(targetMonth);
-        }
-        
-        setHighlightedTaskId(firstResult.id);
-        
-        setTimeout(() => {
-          const taskRow = document.querySelector(`[data-task-id="${firstResult.id}"]`);
-          const container = scrollContainerRef.current;
-          if (taskRow && container) {
-            container.scrollTo({
-              top: taskRow.getBoundingClientRect().top + container.scrollTop - 80,
-              behavior: 'smooth'
-            });
-          }
-        }, 100);
+        navigateToTask(searchResults[0].id, searchResults[0].date);
       }
     } catch (err) {
       console.error("Search failed:", err);
     }
-  }, [currentMonth, currentYear]);
+  }, [currentMonth, currentYear, navigateToTask]);
 
   if (loading) {
     return (
@@ -742,6 +729,7 @@ export default function App() {
                 open={searchOpen}
                 onClose={() => setSearchOpen(false)}
                 onSearch={handleSearch}
+                onNavigate={navigateToTask}
               />
 
               <DndContext

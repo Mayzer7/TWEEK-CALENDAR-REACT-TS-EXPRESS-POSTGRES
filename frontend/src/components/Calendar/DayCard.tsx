@@ -11,7 +11,9 @@ export type Task = {
   text: string;
   completed: boolean;
   position?: number;
-  date?: string;
+  date: string;
+  created_at?: string;
+  updated_at?: string;
 };
 
 interface DayCardProps {
