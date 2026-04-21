@@ -205,10 +205,10 @@
     top: 12px;
     left: 12px;
     right: 12px;
-    bottom: 12px;
+    bottom: auto;
     width: auto;
     height: auto;
-    max-height: none;
+    max-height: calc(100dvh - 24px);
     transform: none;
     border-radius: 24px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
@@ -248,16 +248,6 @@
   }
 }
 
-/* Landscape or very short screens */
-@media (max-height: 500px) {
-  .search-content {
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    border-radius: 0;
-  }
-}
 
 /* Very narrow screens */
 @media (max-width: 350px) {
@@ -265,7 +255,8 @@
     left: 8px;
     right: 8px;
     top: 8px;
-    bottom: 8px;
+    bottom: auto;
+    transform: none;
     border-radius: 16px;
   }
   
