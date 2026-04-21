@@ -587,10 +587,9 @@ export default function App() {
   }, [tasksByDate, activeDragTask, fetchTasks, resetDragEdgeState]);
 
   const navigateToTask = useCallback((taskId: string, date: string) => {
-    const [year, month, day] = date.split('-').map(Number);
+    const [year, month] = date.split('-').map(Number);
     const targetYear = year;
     const targetMonth = month - 1;
-    const targetDay = day;
 
     if (targetYear !== currentYear || targetMonth !== currentMonth) {
       setCurrentYear(targetYear);

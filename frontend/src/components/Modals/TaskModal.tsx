@@ -6,12 +6,7 @@ import {
 } from "@radix-ui/react-icons";
 import "/src/assets/styles/taskModal.css";
 
-type Task = {
-  id: string;
-  text: string;
-  completed: boolean;
-  position?: number;
-};
+import { type Task } from "../Calendar/DayCard";
 
 type Props = {
   task: Task;
