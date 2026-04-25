@@ -13,6 +13,15 @@ interface AuthResponse {
   user: User;
 }
 
+export interface SomedayItem {
+  id: string;
+  text: string;
+  completed: boolean;
+  position: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export const api = {
   async register(username: string, email: string, password: string): Promise<AuthResponse> {
     const res = await fetch(`${API_URL}/auth/register`, {
@@ -166,6 +175,75 @@ export const api = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Failed to reorder tasks");
+    return data;
+  },
+
+  async getSomedayItems(token: string): Promise<SomedayItem[]> {
+    const res = await fetch(`${API_URL}/someday`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to get someday items");
+    return data.items;
+  },
+
+  async createSomedayItem(token: string, text: string, completed = false): Promise<SomedayItem> {
+    const res = await fetch(`${API_URL}/someday`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ text, completed }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to create someday item");
+    return data.item;
+  },
+
+  async updateSomedayItem(
+    token: string,
+    id: string,
+    updates: { text?: string; completed?: boolean; position?: number }
+  ): Promise<SomedayItem> {
+    const res = await fetch(`${API_URL}/someday/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(updates),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to update someday item");
+    return data.item;
+  },
+
+  async deleteSomedayItem(token: string, id: string) {
+    const res = await fetch(`${API_URL}/someday/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || "Failed to delete someday item");
+    }
+  },
+
+  async reorderSomedayItems(
+    token: string,
+    updates: Array<{ id: string; position: number }>
+  ) {
+    const res = await fetch(`${API_URL}/someday/reorder`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ updates }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to reorder someday items");
     return data;
   },
 

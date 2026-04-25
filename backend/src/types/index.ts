@@ -18,6 +18,16 @@ export interface Task {
   updated_at: Date;
 }
 
+export interface SomedayItem {
+  id: string;
+  user_id: string;
+  text: string;
+  completed: boolean;
+  position: number;
+  created_at: Date;
+  updated_at: Date;
+}
+
 export interface AuthRequest extends Express.Request {
   user?: { id: string; email?: string; username?: string };
 }

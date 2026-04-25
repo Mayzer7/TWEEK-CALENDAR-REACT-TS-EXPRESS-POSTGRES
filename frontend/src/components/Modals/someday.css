@@ -1,0 +1,251 @@
+.someday-content {
+  min-width: 340px;
+  position: fixed;
+  top: 72px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 760px;
+  max-width: calc(100vw - 32px);
+  max-height: min(76vh, 820px);
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.18), 0 8px 16px rgba(0, 0, 0, 0.08);
+  animation: searchAppear 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1001;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.someday-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 24px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.someday-title {
+  font-size: 30px;
+  line-height: 1;
+}
+
+.someday-subtitle {
+  margin-top: 8px;
+  color: #6f7686;
+  font-family: "SuisseIntl Regular", sans-serif;
+  font-size: 15px;
+}
+
+.someday-create {
+  display: flex;
+  gap: 12px;
+  padding: 18px 24px;
+  background: linear-gradient(180deg, #fafcff 0%, #f7f9ff 100%);
+}
+
+.someday-create-input {
+  flex: 1;
+  min-width: 0;
+  height: 52px;
+  border: 1px solid rgba(81, 103, 244, 0.15);
+  border-radius: 16px;
+  padding: 0 18px;
+  outline: none;
+  font-family: "SuisseIntl Regular", sans-serif;
+  font-size: 16px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.someday-create-input:focus {
+  border-color: rgba(81, 103, 244, 0.45);
+  box-shadow: 0 0 0 4px rgba(81, 103, 244, 0.08);
+}
+
+.someday-create-button {
+  min-width: 132px;
+  height: 52px;
+  border-radius: 16px;
+  background: #111111;
+  color: #ffffff;
+  font-family: "SuisseIntl Bold", sans-serif;
+  font-size: 15px;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.someday-create-button:hover {
+  background: #5167f4;
+  transform: translateY(-1px);
+}
+
+.someday-feedback {
+  margin: 0 24px 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-family: "SuisseIntl Regular", sans-serif;
+  font-size: 14px;
+}
+
+.someday-feedback.error {
+  background: rgba(255, 76, 76, 0.08);
+  color: #b12f2f;
+}
+
+.someday-status,
+.someday-empty {
+  margin: 0 24px 24px;
+  padding: 32px 20px;
+  border-radius: 20px;
+  background: #fafafa;
+  text-align: center;
+}
+
+.someday-status {
+  color: #7b7b7b;
+  font-family: "SuisseIntl Regular", sans-serif;
+}
+
+.someday-empty-title {
+  font-size: 20px;
+}
+
+.someday-empty-text {
+  margin-top: 10px;
+  color: #757575;
+  font-family: "SuisseIntl Regular", sans-serif;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.someday-list-wrap {
+  padding: 0 24px 24px;
+  overflow-y: auto;
+}
+
+.someday-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.someday-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 64px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.2s ease;
+}
+
+.someday-item.dragging {
+  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.12);
+}
+
+.someday-item.completed {
+  background: #fbfbfb;
+}
+
+.someday-item-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 17px;
+  line-height: 1.4;
+  color: #1c1c1c;
+  font-family: "SuisseIntl Bold", sans-serif;
+}
+
+.someday-item.completed .someday-item-input {
+  color: #909090;
+  text-decoration: line-through;
+}
+
+.someday-action {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  color: #7a7a7a;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.someday-action:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #191919;
+}
+
+.someday-complete.active {
+  color: #5167f4;
+}
+
+.someday-drag {
+  cursor: grab;
+}
+
+.someday-drag:active {
+  cursor: grabbing;
+}
+
+.someday-delete:hover {
+  background: rgba(255, 76, 76, 0.08);
+  color: #cf3030;
+}
+
+.someday-list-wrap::-webkit-scrollbar {
+  width: 8px;
+}
+
+.someday-list-wrap::-webkit-scrollbar-thumb {
+  background: #dadff0;
+  border-radius: 999px;
+}
+
+@media (max-width: 720px) {
+  .someday-content {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-width: none;
+    max-height: calc(100dvh - 24px);
+    transform: none;
+    border-radius: 24px;
+    animation: searchAppearMobile 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .someday-header {
+    padding: 18px 16px 14px;
+  }
+
+  .someday-title {
+    font-size: 24px;
+  }
+
+  .someday-create {
+    padding: 14px 16px;
+    flex-direction: column;
+  }
+
+  .someday-create-button {
+    width: 100%;
+  }
+
+  .someday-status,
+  .someday-empty {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+
+  .someday-list-wrap {
+    padding: 0 16px 16px;
+  }
+}

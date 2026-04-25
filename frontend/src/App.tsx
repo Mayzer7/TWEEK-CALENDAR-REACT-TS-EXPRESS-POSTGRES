@@ -23,6 +23,7 @@ import DayCard, { type Task } from "./components/Calendar/DayCard";
 import AuthPage from "./components/Auth/AuthPage";
 import ProfileModal from "./components/Auth/ProfileModal";
 import SearchModal from "./components/Modals/SearchModal";
+import SomedayModal from "./components/Modals/SomedayModal";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import { storage, api } from "./services/api";
@@ -100,6 +101,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [somedayOpen, setSomedayOpen] = useState(false);
   const [highlightedTaskId, setHighlightedTaskId] = useState<string | null>(null);
   const hasScrolledRef = useRef(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -711,6 +713,7 @@ export default function App() {
                  currentRealYear={nowMoscow.getFullYear()}
                  onPrev={() => changeMonth(-1)}
                  onNext={() => changeMonth(1)}
+                 onSomedayClick={() => setSomedayOpen(true)}
                  onProfileClick={() => setProfileOpen(true)}
                  onSearchClick={() => setSearchOpen(true)}
                  avatar={user?.avatar}
@@ -729,6 +732,11 @@ export default function App() {
                 onClose={() => setSearchOpen(false)}
                 onSearch={handleSearch}
                 onNavigate={navigateToTask}
+              />
+
+              <SomedayModal
+                open={somedayOpen}
+                onClose={() => setSomedayOpen(false)}
               />
 
               <DndContext
