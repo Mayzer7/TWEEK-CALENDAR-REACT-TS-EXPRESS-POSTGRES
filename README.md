@@ -1,3 +1,5 @@
+<img width="1920" height="1080" alt="1" src="https://github.com/user-attachments/assets/6fed01c6-49cd-4e0d-a153-76ff4c9870b7" />
+
 ## Docker запуск (одной командой)
 
 ### Требования
